@@ -1,0 +1,16 @@
+*.pyc
+TestLogs*
+TestStatus*
+test_results.*
+*core
+*.mc
+siloFiles/
+*.restartcheck
+*.data
+*.out
+*.err
+*.log
+*.egg-info
+*.txt
+*.html
+build

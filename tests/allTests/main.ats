@@ -1,0 +1,16 @@
+# This is the top level ats script.  it scans all the subdirectories
+# looking for other ats scripts to source.
+
+import os
+
+fnames = os.listdir(".")
+fnames.sort()
+
+for fname in fnames:
+    if not os.path.isdir(fname):
+        continue
+
+    for sfname in os.listdir(fname):
+        if sfname.endswith(".ats"):
+            if (sfname != "continue.ats") and (sfname != "_special_.ats"):
+                source(os.path.join(fname, sfname))

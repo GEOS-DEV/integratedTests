@@ -11,6 +11,5 @@ siloFiles/
 *.err
 *.log
 *.egg-info
-*.txt
 *.html
 build

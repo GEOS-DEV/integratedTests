@@ -1,0 +1,44 @@
+restartcheck_params = {}
+restartcheck_params["atol"] = 1.0E-6
+restartcheck_params["rtol"] = 1.0E-5
+
+decks = (("fractureMatrixThermalFlow_edfm", "Thermal single-phase flow with an edfm fracture.",
+          ((1, 1, 1), (2, 2, 1)), 5, 10),
+         ("fractureMatrixThermalFlow_conforming",
+          "Thermal single-phase flow with a conforming fracture", 
+          ((1, 1, 1), (2, 2, 2)), 5, 10))
+
+for deck, description, partitions, restart, num_steps in decks:
+
+    for partition in partitions:
+        nx = partition[0]
+        ny = partition[1]
+        nz = partition[2]
+        N = nx * ny * nz
+
+        testcase_name = "%s_%02d" % (deck, N)
+        base_name = "0to%d" % num_steps
+
+        steps = (geos(deck=deck + ".xml",
+                      name=base_name,
+                      np=N,
+                      ngpu=1,
+                      x_partitions=nx,
+                      y_partitions=ny,
+                      z_partitions=nz,
+                      restartcheck_params=restartcheck_params), )
+
+        if restart > 0:
+            steps += (geos(deck=deck + ".xml",
+                           name="%dto%d" % (restart, num_steps),
+                           np=N,
+                           ngpu=1,
+                           x_partitions=nx,
+                           y_partitions=ny,
+                           z_partitions=nz,
+                           restart_file=os.path.join(testcase_name, "%s_restart_%09d" % (base_name, restart)),
+                           baseline_pattern="%s_restart_[0-9]+\.root" % base_name,
+                           allow_rebaseline=False,
+                           restartcheck_params=restartcheck_params), )
+
+        TestCase(name=testcase_name, desc=description, label="auto", owner="Frank Fei", independent=True, steps=steps)

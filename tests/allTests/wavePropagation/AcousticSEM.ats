@@ -8,7 +8,11 @@ decks = (("acous3D_abc_smoke", "Acoustic wave solver, first-order FE, absorbing 
                  "Acoustic wave solver, first-order FE, absorbing BC on the sides, free surface BC at the top",
                  ((1, 1, 1), (2, 2, 2)), 100, 200),
          ("acous3D_pml_smoke", "Acoustic wave solver, first-order FE, perfectly matched layer BC", ((1, 1, 1),
-                                                                                                    (2, 2, 2)), 20, 40))
+                                                                                                    (2, 2, 2)), 20, 40),
+         ("acous3D_Q3_abc_smoke", "Acoustic wave solver, third-order FE, absorbing BC", ((1, 1, 1), (2, 2, 2)), 100,
+          200), ("acous3D_Q3_abc_fs_smoke",
+                 "Acoustic wave solver, third-order FE, absorbing BC on the sides, free surface BC at the top",
+                 ((1, 1, 1), (2, 2, 2)), 100, 200))
 
 for deck, description, partitions, restart, num_steps in decks:
     for partition in partitions:

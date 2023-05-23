@@ -8,6 +8,12 @@ decks = ((
     ((1, 1, 1), (2, 2, 2)), 100, 200
 ), ("elas3D_firstOrder_fs_smoke",
     "Elastic wave solver, first-order FE, first order formulation, absorbing BC on the sides, free surface BC at the top",
+    ((1, 1, 1), (2, 2, 2)), 100, 200),
+         (
+    "elas3D_Q3_firstOrder_abc_smoke", "Elastic wave solver, third-order FE, first order formulation, absorbing BC",
+    ((1, 1, 1), (2, 2, 2)), 100, 200
+), ("elas3D_Q3_firstOrder_fs_smoke",
+    "Elastic wave solver, third-order FE, first order formulation, absorbing BC on the sides, free surface BC at the top",
     ((1, 1, 1), (2, 2, 2)), 100, 200))
 
 for deck, description, partitions, restart, num_steps in decks:

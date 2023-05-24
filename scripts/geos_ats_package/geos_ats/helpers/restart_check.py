@@ -1,4 +1,4 @@
-from geos_ats.helpers.permute_array import permuteArray    # type: ignore[import]
+
 import h5py    # type: ignore[import]
 from mpi4py import MPI    # type: ignore[import]
 import numpy as np    # type: ignore[import]
@@ -7,6 +7,13 @@ import os
 import re
 import argparse
 import logging
+from pathlib import Path
+try:
+    from geos_ats.helpers.permute_array import permuteArray    # type: ignore[import]
+except ImportError:
+    # Fallback method to be used if geos_ats isn't found
+    from permute_array import permuteArray    # type: ignore[import]
+
 
 RTOL_DEFAULT = 0.0
 ATOL_DEFAULT = 0.0

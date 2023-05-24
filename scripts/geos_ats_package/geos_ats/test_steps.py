@@ -397,11 +397,12 @@ class geos(TestStepBase):
 
     checkstepnames = ["restartcheck"]
 
-    def __init__(self, restartcheck_params=None, **kw):
+    def __init__(self, restartcheck_params=None, curvecheck_params=None, **kw):
         """
         Initializes the parameters of this test step, and creates the appropriate check steps.
 
         RESTARTCHECK_PARAMS [in]: Dictionary that gets passed on to the restartcheck step.
+        CURVECHECK_PARAMS [in]: Dictionary that gets passed on to the curvecheck step.
         KEYWORDS [in]: Dictionary that is used to set the parameters of this step and also all check steps.
         """
 
@@ -409,12 +410,14 @@ class geos(TestStepBase):
         self.setParams(kw, self.params)
 
         checkOption = self.getCheckOption()
-        if checkOption == "all":
-            self.checksteps = [restartcheck(restartcheck_params, **kw)]
-        elif checkOption == "restartcheck":
-            self.checksteps = [restartcheck(restartcheck_params, **kw)]
-        else:
-            self.checksteps = []
+        self.checksteps = []
+        if checkOption in ["all", "curvecheck"]:
+            if curvecheck_params is not None:
+                self.checksteps.append(curvecheck(curvecheck_params, **kw))
+
+        if checkOption in ["all", "restartcheck"]:
+            if restartcheck_params is not None:
+                self.checksteps.append(restartcheck(restartcheck_params, **kw))
 
     def label(self):
         return "geos"
@@ -630,6 +633,100 @@ class restartcheck(CheckTestStepBase):
 
     def resultPaths(self):
         return [os.path.join(self.p.output_directory, "%s.restartcheck" % os.path.splitext(self.p.file_pattern)[0])]
+
+    def clean(self):
+        self._clean(self.resultPaths())
+
+
+################################################################################
+# curvecheck
+################################################################################
+class curvecheck(CheckTestStepBase):
+    """
+    Class for the curve check test step.
+    """
+
+    doc = """CheckTestStep to compare a curve file against a baseline."""
+
+    command = """curve_check.py [-h] [-c CURVE [CURVE ...]] [-t TOLERANCE] [-w] [-o OUTPUT] [-n N_COLUMN] [-u {milliseconds,seconds,minutes,hours,days,years}] filename baseline"""
+
+    params = TestStepBase.defaultParams + CheckTestStepBase.checkParams + (
+        TestStepBase.commonParams["deck"], TestStepBase.commonParams["name"], TestStepBase.commonParams["np"],
+        TestStepBase.commonParams["allow_rebaseline"], TestStepBase.commonParams["baseline_dir"],
+        TestStepBase.commonParams["output_directory"],
+        TestParam("filename", "Name of the target curve file written by GEOS."),
+        TestParam("curves", "A list of parameter, setname value pairs."),
+        TestParam("tolerance", "Curve check tolerance, default is 0.0."),
+        TestParam("warnings_are_errors", "Treat warnings as errors, default is True."),
+        TestParam("time_units", "Time units to use for plots."))
+
+    def __init__(self, curvecheck_params, **kw):
+        """
+        Set parameters with curvecHECK_PARAMS and then with KEYWORDS.
+        """
+        CheckTestStepBase.__init__(self)
+        self.p.warnings_are_errors = True
+        if curvecheck_params is not None:
+            self.setParams(curvecheck_params, self.params)
+        self.setParams(kw, self.params)
+
+    def label(self):
+        return "curvecheck"
+
+    def useMPI(self):
+        return True
+
+    def executable(self):
+        if self.getTestMode():
+            return "python"
+        else:
+            return sys.executable
+
+    def update(self, dictionary):
+        self.setParams(dictionary, self.params)
+        self.handleCommonParams()
+
+        self.requireParam("deck")
+        self.requireParam("baseline_dir")
+        self.requireParam("output_directory")
+
+        self.baseline_file = os.path.join(self.p.baseline_dir, self.p.filename)
+        self.target_file = os.path.join(self.p.output_directory, self.p.filename)
+
+        if self.p.allow_rebaseline is None:
+            self.p.allow_rebaseline = True
+
+    def insertStep(self, steps):
+        if config.restartcheck_enabled and self.p.enabled:
+            steps.append(self)
+
+    def makeArgs(self):
+        cur_dir = os.path.dirname(os.path.realpath(__file__))
+        script_location = os.path.join(cur_dir, "helpers", "curve_check.py")
+        args = [script_location]
+
+        if self.p.curves is not None:
+            for p, s in self.p.curves:
+                args += ["-c", p, s]
+        if self.p.tolerance is not None:
+            args += ["-t", self.p.tolerance]
+        if self.p.time_units is not None:
+            args += ["-u", self.p.time_units]
+        if self.p.warnings_are_errors:
+            args += ["-w"]
+
+        args += [self.target_file, self.baseline_file]
+        return list(map(str, args))
+
+    def rebaseline(self):
+        if not self.p.allow_rebaseline:
+            Log("Rebaseline not allowed for curvecheck of %s." % self.p.name)
+            return
+
+        shutil.copyfile(self.target_file, self.baseline_file)
+
+    def resultPaths(self):
+        return [os.path.join(self.p.output_directory, self.p.filename)]
 
     def clean(self):
         self._clean(self.resultPaths())

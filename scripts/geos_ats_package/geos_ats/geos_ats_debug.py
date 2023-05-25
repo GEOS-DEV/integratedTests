@@ -25,5 +25,6 @@ def debug_geosats(build_root='~/GEOS/build-quartz-gcc@12-release', extra_args=[]
 
 
 if (__name__ == '__main__'):
-    debug_geosats(extra_args=['-a', 'veryclean'])
+    # debug_geosats(extra_args=['-a', 'veryclean'])
+    # debug_geosats(extra_args=['-a', 'rebaselinefailed'])
     debug_geosats()

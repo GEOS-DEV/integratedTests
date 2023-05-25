@@ -662,7 +662,7 @@ class curvecheck(CheckTestStepBase):
 
     def __init__(self, curvecheck_params, **kw):
         """
-        Set parameters with curvecHECK_PARAMS and then with KEYWORDS.
+        Set parameters with CURVECHECK_PARAMS and then with KEYWORDS.
         """
         CheckTestStepBase.__init__(self)
         self.p.warnings_are_errors = True

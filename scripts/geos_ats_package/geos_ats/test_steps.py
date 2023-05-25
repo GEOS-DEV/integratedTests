@@ -692,6 +692,7 @@ class curvecheck(CheckTestStepBase):
 
         self.baseline_file = os.path.join(self.p.baseline_dir, self.p.filename)
         self.target_file = os.path.join(self.p.output_directory, self.p.filename)
+        self.figure_root = os.path.join(self.p.output_directory, 'curve_check')
 
         if self.p.allow_rebaseline is None:
             self.p.allow_rebaseline = True
@@ -715,6 +716,7 @@ class curvecheck(CheckTestStepBase):
         if self.p.warnings_are_errors:
             args += ["-w"]
 
+        args += ['-o', self.figure_root]
         args += [self.target_file, self.baseline_file]
         return list(map(str, args))
 
@@ -726,7 +728,9 @@ class curvecheck(CheckTestStepBase):
         shutil.copyfile(self.target_file, self.baseline_file)
 
     def resultPaths(self):
-        return [os.path.join(self.p.output_directory, self.p.filename)]
+        figure_pattern = os.path.join(self.figure_root, '*.png')
+        figure_list = sorted(glob.glob(figure_pattern))
+        return [self.target_file] + figure_list
 
     def clean(self):
         self._clean(self.resultPaths())

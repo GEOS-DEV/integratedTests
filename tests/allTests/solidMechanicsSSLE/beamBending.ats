@@ -2,6 +2,14 @@ restartcheck_params = {}
 restartcheck_params["atol"] = 1.0E-3
 restartcheck_params["rtol"] = 1.0E-7
 
+curvecheck_params = {}
+curvecheck_params['filename'] = 'displacement_history.hdf5'
+curvecheck_params['tolerance'] = 1e-10
+curvecheck_params['script_instructions'] = [['./beamBending_curve.py', 'curve', 'totalDisplacement', 'trace']]
+curvecheck_params['script_tolerance'] = 0.001
+curvecheck_params['curves'] = [['totalDisplacement', 'trace']]
+
+
 partitions = ((1, 1, 1), (2, 2, 2), (3, 3, 3))
 for partition in partitions:
     nx = partition[0]
@@ -21,7 +29,8 @@ for partition in partitions:
                          x_partitions=nx,
                          y_partitions=ny,
                          z_partitions=nz,
-                         restartcheck_params=restartcheck_params), ))
+                         restartcheck_params=restartcheck_params,
+                         curvecheck_params=curvecheck_params), ))
 
     TestCase(name="beamBending_vem_%02d" % N,
              desc="Tests beam bending on %d ranks applying Virtual Elements." % N,

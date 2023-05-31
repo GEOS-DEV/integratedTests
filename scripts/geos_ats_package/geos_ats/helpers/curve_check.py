@@ -1,5 +1,7 @@
 
 import os
+import importlib.util
+import sys
 import argparse
 import numpy as np
 from scipy.interpolate import interp1d
@@ -45,7 +47,34 @@ def interpolate_values_time(ta, xa, tb):
         return np.reshape(xd, N)
 
 
-def check_diff(parameter_name, set_name, target, baseline, tolerance, errors):
+def evaluate_external_script(script, fn, data):
+    """
+    Evaluate an external script to produce the curve
+
+    Args:
+        script (str): Path to a python script
+        fn (str): Name of the function to call
+
+    Returns:
+        np.ndarray: Curve values
+    """
+    script = os.path.abspath(script)
+    if os.path.isfile(script):
+        module_name = os.path.split(script)[1]
+        module_name = module_name[:module_name.rfind('.')]
+        spec = importlib.util.spec_from_file_location(module_name, script)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+        if hasattr(module, fn):
+            return getattr(module, fn)(**data)
+        else:
+            raise Exception(f'External script does not contain the expected function ({fn})')
+    else:
+        raise FileNotFoundError(f'Could not find script: {script}')
+
+
+def check_diff(parameter_name, set_name, target, baseline, tolerance, errors, modifier='baseline'):
     """
     Compute the L2-norm of the diff and compare to the set tolerance
 
@@ -61,9 +90,9 @@ def check_diff(parameter_name, set_name, target, baseline, tolerance, errors):
         np.ndarray: Interpolated value array
     """
     dx = target - baseline
-    diff = np.sqrt(np.sum(dx * dx)) / len(dx)
+    diff = np.sqrt(np.sum(dx * dx)) / dx.size
     if (diff > tolerance):
-        errors.append(f'{parameter_name}_{set_name} diff exceeds tolerance: ||t-b||={diff}, tolerance={tolerance}')
+        errors.append(f'{modifier}_{parameter_name}_{set_name} diff exceeds tolerance: ||t-b||={diff}, {modifier}_tolerance={tolerance}')
 
 
 def curve_check_figure(parameter_name, set_name, data, data_sizes, output_root, ncol, units_time):
@@ -81,14 +110,16 @@ def curve_check_figure(parameter_name, set_name, data, data_sizes, output_root, 
     """
     # Setup
     style = {'target': {'marker': '', 'linestyle': '-'},
-             'baseline': {'marker': '.', 'linestyle': ''}}
+             'baseline': {'marker': '.', 'linestyle': ''},
+             'script': {'marker': '', 'linestyle': ':'}}
     time_key = f'{parameter_name} Time'
     value_key = f'{parameter_name} {set_name}'
+    location_key = f'{parameter_name} ReferencePosition {set_name}'
     s = data_sizes[parameter_name][set_name]
     N = s[list(s.keys())[0]]
     nrow = int(np.ceil(float(N[2]) / ncol))
     time_scale = unit_map[units_time]
-    time_label = f'Time ({units_time})'
+    horizontal_label = f'Time ({units_time})'
 
     # Create the figure
     fig = plt.figure(figsize=(8, 6))
@@ -97,29 +128,41 @@ def curve_check_figure(parameter_name, set_name, data, data_sizes, output_root, 
         for k in s.keys():
             t = np.squeeze(data[k][time_key]) / time_scale
             x = np.squeeze(data[k][value_key][:, :, ii])
+            position = np.squeeze(data[k][location_key][0, :, 0])
 
             if (N[1] == 1):
                 ax.plot(t, x, label=k, **style[k])
 
             else:
                 cmap = plt.get_cmap('jet')
-                for jj in range(N[1]):
-                    c = cmap(float(jj) / N[1])
-                    kwargs = {}
-                    if (jj == 0):
-                        kwargs['label'] = k
-                    ax.plot(t, x[:, jj], color=c, **style[k], **kwargs)
+                if N[0] > N[1]:
+                    # Timestep axis
+                    for jj in range(N[1]):
+                        c = cmap(float(jj) / N[1])
+                        kwargs = {}
+                        if (jj == 0):
+                            kwargs['label'] = k
+                        ax.plot(t, x[:, jj], color=c, **style[k], **kwargs)
+                else:
+                    # Spatial axis
+                    horizontal_label = 'X (m)'
+                    for jj in range(N[0]):
+                        c = cmap(float(jj) / N[0])
+                        kwargs = {}
+                        if (jj == 0):
+                            kwargs['label'] = k
+                        ax.plot(position, x[jj, :], color=c, **style[k], **kwargs)
 
         # Set labels
-        ax.set_xlabel(time_label)
+        ax.set_xlabel(horizontal_label)
         ax.set_ylabel(value_key)
-        ax.set_xlim(t[[0, -1]])
+        # ax.set_xlim(t[[0, -1]])
         ax.legend(loc=2)
     plt.tight_layout()
     fig.savefig(os.path.join(output_root, f'{value_key}.png'), dpi=200)
 
 
-def compare_time_history_curves(fname, baseline, curve, tolerance, output, output_n_column, units_time):
+def compare_time_history_curves(fname, baseline, curve, tolerance, output, output_n_column, units_time, script_instructions, script_tolerance):
     """
     Compute time history curves
 
@@ -127,10 +170,12 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
         fname (str): Target curve file name
         baseline (str): Baseline curve file name
         curve (list): list containing pairs of value and set names to test
-        tolerance (np.ndarray): Baseline value array
+        tolerance (float): Tolerance for baseline/target diffs
         output (str): Path to place output figures
         ncol (int): Number of columns to use in the figure
         units_time (str): Time units for the figure
+        script_instructions (list): List of (script, function, parameter, setname) values
+        script_tolerance (float): Tolerance for script/target diffs
 
     Returns:
         tuple: warnings, errors
@@ -166,11 +211,23 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
                 data_sizes[p][s] = {}
             data_sizes[p][s][k] = np.shape(data[k][f'{p} {s}'])
 
+    # Generate script-based curve
+    if script_instructions and (len(data) > 0):
+        data['script'] = {}
+        try:
+            for script, fn, p, s in script_instructions:
+                data['script'][f'{p} Time'] = data['target'][f'{p} Time']
+                data['script'][f'{p} ReferencePosition {s}'] = data['target'][f'{p} ReferencePosition {s}']
+                data['script'][f'{p} {s}'] = evaluate_external_script(script, fn, data['target'])
+                data_sizes[p][s]['script'] = np.shape(data['script'][f'{p} {s}'])
+        except Exception as e:
+            errors.append(str(e))
+
     # Check data diffs
     size_err = '{}_{} values have different sizes: target=({},{},{}) baseline=({},{},{})'
     for p, set_data in data_sizes.items():
         for s, set_sizes in set_data.items():
-            if len(set_sizes) == 2:
+            if (('baseline' in set_sizes) and ('target' in set_sizes)):
                 xa = data['target'][f'{p} {s}']
                 xb = data['baseline'][f'{p} {s}']
                 if set_sizes['target'] == set_sizes['baseline']:
@@ -186,6 +243,10 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
                         check_diff(p, s, xc, xb, tolerance, errors)
                     else:
                         errors.append(f'Cannot perform a curve check for {p}_{s}')
+            if (('script' in set_sizes) and ('target' in set_sizes)):
+                xa = data['target'][f'{p} {s}']
+                xb = data['script'][f'{p} {s}']
+                check_diff(p, s, xa, xb, script_tolerance, errors, modifier='script')
 
     # Render figures
     output = os.path.expanduser(output)
@@ -237,6 +298,18 @@ def curve_check_parser():
                         help=f"Time units for plots (default=seconds)",
                         choices=unit_choices,
                         default='seconds')
+    parser.add_argument("-s",
+                        "--script",
+                        nargs='+',
+                        action='append',
+                        help='Python script instructions (path, function, value, setname)',
+                        default=[])
+    parser.add_argument("-a",
+                        "--alt-tolerance-script",
+                        type=float,
+                        help=f"Alt tolerance to use for script curves",
+                        default=0.0)
+
     return parser
 
 
@@ -246,7 +319,7 @@ def main():
     """
     parser = curve_check_parser()
     args = parser.parse_args()
-    warnings, errors = compare_time_history_curves(args.filename, args.baseline, args.curve, args.tolerance, args.output, args.n_column, args.units_time)
+    warnings, errors = compare_time_history_curves(args.filename, args.baseline, args.curve, args.tolerance, args.output, args.n_column, args.units_time, args.script, args.alt_tolerance_script)
 
     # Write errors/warnings to the screen
     if args.Werror:

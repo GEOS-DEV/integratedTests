@@ -2,7 +2,7 @@
 decks = (("ThermoPoroElastic_efem-edfm_verticalFrac",
           "Thermoporoelastic case with an embeded fracture", 
           ((1, 1, 1), (2, 2, 1)), 10, 10, {"atol": 1.0E-6, "rtol": 4.0E-6}),
-         ("ThermoPoroElastic_confomring",
+         ("ThermoPoroElastic_conforming",
           "Thermoporoelastic case with a conforming fracture",
           ((1, 1, 1), (2, 2, 1)), 10, 10, {"atol": 1.0E-6, "rtol": 4.0E-6}))
 

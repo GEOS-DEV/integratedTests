@@ -3,21 +3,28 @@ restartcheck_params["atol"] = 2.0E-4
 restartcheck_params["rtol"] = 1.0E-7
 
 # format: (<input>, <desc>, <partition_list>, <restart_step>, <total_steps>)
-decks = (("kgdViscosityDominated_smoke", "Testing the KGD hydrofracturing viscosity-dominated case", ((1, 1, 1),
-                                                                                                      (2, 3, 1)), 0,
-          1), ("kgdToughnessDominated_smoke", "Testing the KGD hydrofracturing toughness-dominated case",
-               ((1, 1, 1), (2, 3, 1)), 0, 1), ("kgdValidation_smoke", "Validation example based on Rubin's experiment",
-                                               ((1, 1, 1), (2, 2, 1)), 0, 1),
-         ("heterogeneousInSitu_smoke",
+decks = (("kgdViscosityDominated_smoke", 
+          "Testing the KGD hydrofracturing viscosity-dominated case", 
+          ((1, 1, 1), (2, 3, 1)), 0, 1),
+          ("kgdViscosityDominated_poroelastic", 
+          "Testing the KGD hydrofracturing viscosity-dominated case in a poroelastic solid", 
+          ((1, 1, 1), (2, 3, 1)), 0, 1),  
+          ("kgdToughnessDominated_smoke", "Testing the KGD hydrofracturing toughness-dominated case",
+          ((1, 1, 1), (2, 3, 1)), 0, 1), 
+          ("kgdValidation_smoke", "Validation example based on Rubin's experiment", 
+          ((1, 1, 1), (2, 2, 1)), 0, 1),
+          ("heterogeneousInSitu_smoke",
           "Modeling the growth of a single fracture within a reservoir with heterogeneous in-situ properties",
           ((1, 1, 1), (2, 2, 1)), 0, 4),
          ("pennyShapedToughnessDominated_smoke",
-          "Test the penny Shaped hydrofracture propagating in Toughness-dominated regime", ((1, 1, 1), (2, 3, 1)), 0,
-          5), ("pennyShapedViscosityDominated_smoke",
-               "Test the penny Shaped hydrofracture propagating in Viscosity-dominated regime", ((1, 1, 1), (2, 2, 1)),
-               0, 5), ("pknViscosityDominated_smoke",
-                       "Test the PKN hydrofracture propagating in Viscosity-dominated regime", ((1, 1, 1), (2, 2,
-                                                                                                            1)), 0, 5))
+          "Test the penny Shaped hydrofracture propagating in Toughness-dominated regime", 
+          ((1, 1, 1), (2, 3, 1)), 0,5), 
+          ("pennyShapedViscosityDominated_smoke",
+          "Test the penny Shaped hydrofracture propagating in Viscosity-dominated regime", 
+          ((1, 1, 1), (2, 2, 1)), 0, 5), 
+          ("pknViscosityDominated_smoke",
+          "Test the PKN hydrofracture propagating in Viscosity-dominated regime", 
+          ((1, 1, 1), (2, 2, 1)), 0, 5))
 
 for deck, description, partitions, restart, num_steps in decks:
     for partition in partitions:

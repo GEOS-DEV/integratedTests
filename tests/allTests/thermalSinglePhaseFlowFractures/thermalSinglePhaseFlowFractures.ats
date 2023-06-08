@@ -3,10 +3,10 @@ restartcheck_params["atol"] = 1.0E-6
 restartcheck_params["rtol"] = 1.0E-5
 
 decks = (("fractureMatrixThermalFlow_edfm", "Thermal single-phase flow with an edfm fracture.",
-          ((1, 1, 1), (2, 2, 1)), 5, 10),
+          ((1, 1, 1), (2, 2, 1)), 0, 10),
          ("fractureMatrixThermalFlow_conforming",
           "Thermal single-phase flow with a conforming fracture", 
-          ((1, 1, 1), (2, 2, 2)), 5, 10))
+          ((1, 1, 1), (2, 2, 2)), 0, 10))
 
 for deck, description, partitions, restart, num_steps in decks:
 

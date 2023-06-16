@@ -5,9 +5,10 @@ import os
 
 fnames = os.listdir(".")
 fnames.sort()
+include_pattern = ''
 
 for fname in fnames:
-    if not os.path.isdir(fname):
+    if (not os.path.isdir(fname)) or (include_pattern not in fname):
         continue
 
     for sfname in os.listdir(fname):

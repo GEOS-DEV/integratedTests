@@ -61,6 +61,12 @@ decks = (
         60,
         104),
     (
+        "grav_seg_c1ppu_hyst",
+        "Smoke test for C1-PPU (1D displacement, C1-PPU)",
+        ((1, 1, 1), (1, 1, 2)),    # (3, 1, 1)), 
+        100,
+        109),
+    (
         "deadoil_3ph_staircase_obl_3d",
         "Smoke test for a staircase deadoil test (3D displacement, 3-phase dead-oil, OBL)",
         ((1, 1, 1), (2, 2, 2)),    # (3, 1, 1)), 

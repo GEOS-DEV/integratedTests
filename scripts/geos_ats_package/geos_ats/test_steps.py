@@ -669,6 +669,11 @@ class curvecheck(CheckTestStepBase):
         CheckTestStepBase.__init__(self)
         self.p.warnings_are_errors = True
         if curvecheck_params is not None:
+            # Note: ats seems to store list/tuple parameters incorrectly
+            # Convert these to strings
+            for k in ['curves', 'script_instructions']:
+                if k in curvecheck_params:
+                    curvecheck_params[k] = ';'.join([','.join(c) for c in curvecheck_params[k]])
             self.setParams(curvecheck_params, self.params)
         self.setParams(kw, self.params)
 
@@ -709,14 +714,16 @@ class curvecheck(CheckTestStepBase):
         args = [script_location]
 
         if self.p.curves is not None:
-            for p, s in self.p.curves:
+            for c in self.p.curves.split(';'):
+                p, s = c.split(',')
                 args += ["-c", p, s]
         if self.p.tolerance is not None:
             args += ["-t", self.p.tolerance]
         if self.p.time_units is not None:
             args += ["-u", self.p.time_units]
         if self.p.script_instructions is not None:
-            for script, fn, p, s in self.p.script_instructions:
+            for c in self.p.script_instructions.split(';'):
+                script, fn, p, s = c.split(',')
                 args += ["-s", script, fn, p, s]
         if self.p.script_tolerance is not None:
             args += ["-a", self.p.script_tolerance]

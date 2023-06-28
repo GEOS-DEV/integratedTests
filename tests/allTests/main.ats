@@ -5,7 +5,7 @@ import os
 
 fnames = os.listdir(".")
 fnames.sort()
-include_pattern = ''
+include_pattern = 'Hydro'
 
 for fname in fnames:
     if (not os.path.isdir(fname)) or (include_pattern not in fname):

@@ -89,7 +89,7 @@ def check_diff(parameter_name, set_name, target, baseline, tolerance, errors, mo
     Returns:
         np.ndarray: Interpolated value array
     """
-    dx = target - baseline
+    dx = (target - baseline) / np.nanmean(baseline)
     diff = np.sqrt(np.sum(dx * dx)) / dx.size
     if (diff > tolerance):
         errors.append(f'{modifier}_{parameter_name}_{set_name} diff exceeds tolerance: ||t-b||={diff}, {modifier}_tolerance={tolerance}')
@@ -138,20 +138,26 @@ def curve_check_figure(parameter_name, location_str, set_name, data, data_sizes,
                 if N[0] > N[1]:
                     # Timestep axis
                     for jj in range(N[1]):
-                        c = cmap(float(jj) / N[1])
-                        kwargs = {}
-                        if (jj == 0):
-                            kwargs['label'] = k
-                        ax.plot(t, x[:, jj], color=c, **style[k], **kwargs)
+                        try:
+                            c = cmap(float(jj) / N[1])
+                            kwargs = {}
+                            if (jj == 0):
+                                kwargs['label'] = k
+                            ax.plot(t, x[:, jj], color=c, **style[k], **kwargs)
+                        except Exception as e:
+                            print(f'Error rendering curve {value_key}: {str(e)}')
                 else:
                     # Spatial axis
                     horizontal_label = 'X (m)'
                     for jj in range(N[0]):
-                        c = cmap(float(jj) / N[0])
-                        kwargs = {}
-                        if (jj == 0):
-                            kwargs['label'] = k
-                        ax.plot(position, x[jj, :], color=c, **style[k], **kwargs)
+                        try:
+                            c = cmap(float(jj) / N[0])
+                            kwargs = {}
+                            if (jj == 0):
+                                kwargs['label'] = k
+                            ax.plot(position, x[jj, :], color=c, **style[k], **kwargs)
+                        except Exception as e:
+                            print(f'Error rendering curve {value_key}: {str(e)}')
 
         # Set labels
         ax.set_xlabel(horizontal_label)
@@ -159,7 +165,7 @@ def curve_check_figure(parameter_name, location_str, set_name, data, data_sizes,
         # ax.set_xlim(t[[0, -1]])
         ax.legend(loc=2)
     plt.tight_layout()
-    fig.savefig(os.path.join(output_root, f'{value_key}.png'), dpi=200)
+    fig.savefig(os.path.join(output_root, f'{parameter_name}_{set_name}'), dpi=200)
 
 
 def compare_time_history_curves(fname, baseline, curve, tolerance, output, output_n_column, units_time, script_instructions, script_tolerance):

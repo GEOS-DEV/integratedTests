@@ -9,7 +9,7 @@ curvecheck_params_base["filename"] = "hydrofracture_source_curves.hdf5"
 curvecheck_params_base["tolerance"] = 1e-10
 curvecheck_params_base["script_instructions"] = [["./hydrofractureCurveChecks.py", "tbd", "hydraulicAperture", "source"],
                                                  ["./hydrofractureCurveChecks.py", "tbd", "pressure", "source"]]
-curvecheck_params_base["script_tolerance"] = 1e10
+curvecheck_params_base["script_tolerance"] = 1e-3
 curvecheck_params_base["curves"] = [["hydraulicAperture", "source"], ["pressure", "source"]]
 
 
@@ -125,15 +125,15 @@ walsh_quarter_no_chombo = {
 
 decks = (kgd_viscosity_dominated,
          kgd_toughness_dominated,
-         # kgd_validation,
-         # kgd_edge_based_C3D6,
-         # kgd_node_based_C3D6,
-         # heterogeneous_fracture,
-         # penny_shaped_toughness_dominated,
-         # penny_shaped_viscosity_dominated,
-         # pkn_viscosity_dominated,
-         # sneddon,
-         # walsh_quarter_no_chombo
+         kgd_validation,
+         kgd_edge_based_C3D6,
+         kgd_node_based_C3D6,
+         heterogeneous_fracture,
+         penny_shaped_toughness_dominated,
+         penny_shaped_viscosity_dominated,
+         pkn_viscosity_dominated,
+         sneddon,
+         walsh_quarter_no_chombo
          )
 
 cases = []
@@ -151,7 +151,6 @@ for deck in decks:
 
         curvecheck_params = None
         if ("aperture_curve_method" in deck) and ("pressure_curve_method" in deck):
-            import random
             curvecheck_params = curvecheck_params_base.copy()
             curvecheck_params["script_instructions"][0][1] = deck["aperture_curve_method"]
             curvecheck_params["script_instructions"][1][1] = deck["pressure_curve_method"]

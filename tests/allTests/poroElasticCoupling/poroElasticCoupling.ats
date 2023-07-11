@@ -121,14 +121,21 @@ def _build_Terzaghi_cases():
                                       lambda part: "PoroElastic_Terzaghi_FIM_%02d" % _n_ranks(part))
 
 
-def _build_Mandel_cases():
+def _build_Mandel_fim_cases():
     description = Description(lambda part: "Mandel's 2D Consolidation on %d ranks" % _n_ranks(part), "auto",
                               "Nicola Castelletto, Jian Huang", True)
     restartcheck_params = {"atol": 1.0e-8, "rtol": 2.0e-8}
-    _build_poro_elastic_coupling_case("PoroElastic_Mandel_smoke.xml", (2, 4), ((1, 1, 1), (3, 1, 1), (3, 1, 2)),
+    _build_poro_elastic_coupling_case("PoroElastic_Mandel_smoke_fim.xml", (2, 4), ((1, 1, 1), (3, 1, 1), (3, 1, 2)),
                                       description, restartcheck_params,
-                                      lambda part: "PoroElastic_Mandel_smoke_%s-%s-%s" % part)
+                                      lambda part: "PoroElastic_Mandel_smoke_fim_%s-%s-%s" % part)
 
+def _build_Mandel_sequential_cases():
+    description = Description(lambda part: "Sequential Mandel's 2D Consolidation on %d ranks" % _n_ranks(part), "auto",
+                              "Nicola Castelletto, Jian Huang", True)
+    restartcheck_params = {"atol": 1.0e-8, "rtol": 2.0e-8}
+    _build_poro_elastic_coupling_case("PoroElastic_Mandel_smoke_sequential.xml", (2, 4), ((1, 1, 1), (3, 1, 1), (3, 1, 2)),
+                                      description, restartcheck_params,
+                                      lambda part: "PoroElastic_Mandel_smoke_sequential_%s-%s-%s" % part)
 
 def _build_Mandel_prism6_cases():
     description = Description(
@@ -140,14 +147,21 @@ def _build_Mandel_prism6_cases():
                                       lambda part: "PoroElastic_Mandel_prism6_smoke_%s-%s-%s" % part)
 
 
-def _build_Deadoil_cases():
+def _build_Deadoil_fim_cases():
     description = Description(lambda part: "Deadoil 3 phase poroelastic case on %d ranks" % _n_ranks(part), "auto",
                               "N. Castelletto & M. Cusini", True)
     restartcheck_params = {"atol": 1.0e-8, "rtol": 2.0e-8}
-    _build_poro_elastic_coupling_case("PoroElastic_deadoil_3ph_baker_2d.xml", (0, 15), ((1, 1, 1), (2, 1, 2)),
+    _build_poro_elastic_coupling_case("PoroElastic_deadoil_3ph_baker_2d_fim.xml", (0, 15), ((1, 1, 1), (2, 1, 2)),
                                       description, restartcheck_params,
-                                      lambda part: "PoroElastic_deadoil_3ph_baker_2d%s-%s-%s" % part)
+                                      lambda part: "PoroElastic_deadoil_3ph_baker_2d_fim_%s-%s-%s" % part)
 
+def _build_Deadoil_sequential_cases():
+    description = Description(lambda part: "Sequential Deadoil 3 phase poroelastic case on %d ranks" % _n_ranks(part), "auto",
+                              "N. Castelletto & M. Cusini", True)
+    restartcheck_params = {"atol": 1.0e-8, "rtol": 2.0e-8}
+    _build_poro_elastic_coupling_case("PoroElastic_deadoil_3ph_baker_2d_sequential.xml", (0, 15), ((1, 1, 1), (2, 1, 2)),
+                                      description, restartcheck_params,
+                                      lambda part: "PoroElastic_deadoil_3ph_baker_2d_sequential_%s-%s-%s" % part)
 
 def _build_PoroElasticWell_cases():
     description = Description(lambda part: "PoroElastic wellbore problem on %d ranks" % _n_ranks(part), "auto",
@@ -250,9 +264,11 @@ def _build_PoroElasticGravity_cases():
 
 def test_poro_elastic_coupling_cases():
     _build_Terzaghi_cases()
-    _build_Mandel_cases()
+    _build_Mandel_fim_cases()
+    _build_Mandel_sequential_cases()    
     _build_Mandel_prism6_cases()
-    _build_Deadoil_cases()
+    _build_Deadoil_fim_cases()
+    _build_Deadoil_sequential_cases()    
     _build_PoroElasticWell_cases()
     _build_PoroDruckerPragerWell_cases()
     _build_PoroDelftEggWell_cases()

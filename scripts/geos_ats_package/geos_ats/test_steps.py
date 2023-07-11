@@ -656,10 +656,9 @@ class curvecheck(CheckTestStepBase):
         TestStepBase.commonParams["output_directory"],
         TestParam("filename", "Name of the target curve file written by GEOS."),
         TestParam("curves", "A list of parameter, setname value pairs."),
-        TestParam("tolerance", "Curve check tolerance, default is 0.0."),
+        TestParam("tolerance", "Curve check tolerance (||x-y||/N), can be specified as a single value or a list of floats corresponding to the curves."),
         TestParam("warnings_are_errors", "Treat warnings as errors, default is True."),
         TestParam("script_instructions", "A list of (path, function, value, setname) entries"),
-        TestParam("script_tolerance", "Curve check tolerance for curves, default is 0.0"),
         TestParam("time_units", "Time units to use for plots."))
 
     def __init__(self, curvecheck_params, **kw):
@@ -669,12 +668,24 @@ class curvecheck(CheckTestStepBase):
         CheckTestStepBase.__init__(self)
         self.p.warnings_are_errors = True
         if curvecheck_params is not None:
+            c = curvecheck_params.copy()
+            Nc = len(c.get('curves', []))
+
             # Note: ats seems to store list/tuple parameters incorrectly
             # Convert these to strings
             for k in ['curves', 'script_instructions']:
-                if k in curvecheck_params:
-                    curvecheck_params[k] = ';'.join([','.join(c) for c in curvecheck_params[k]])
-            self.setParams(curvecheck_params, self.params)
+                if k in c:
+                    if isinstance(c[k], (list, tuple)):
+                        c[k] = ';'.join([','.join(c) for c in c[k]])
+
+            # Check whether tolerance was specified as a single float, list
+            # and then convert into a comma-delimited string
+            tol = c.get('tolerance', 0.0)
+            if isinstance(tol, (float, int)):
+                tol = [tol] * Nc
+            c['tolerance'] = ','.join([str(x) for x in tol])
+
+            self.setParams(c, self.params)
         self.setParams(kw, self.params)
 
     def label(self):
@@ -718,15 +729,14 @@ class curvecheck(CheckTestStepBase):
                 p, s = c.split(',')
                 args += ["-c", p, s]
         if self.p.tolerance is not None:
-            args += ["-t", self.p.tolerance]
+            for t in self.p.tolerance.split(','):
+                args += ["-t", t]
         if self.p.time_units is not None:
             args += ["-u", self.p.time_units]
         if self.p.script_instructions is not None:
             for c in self.p.script_instructions.split(';'):
                 script, fn, p, s = c.split(',')
                 args += ["-s", script, fn, p, s]
-        if self.p.script_tolerance is not None:
-            args += ["-a", self.p.script_tolerance]
         if self.p.warnings_are_errors:
             args += ["-w"]
 

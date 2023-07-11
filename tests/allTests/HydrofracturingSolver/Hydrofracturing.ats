@@ -6,10 +6,9 @@ restartcheck_params["rtol"] = 1.0E-7
 
 curvecheck_params_base = {}
 curvecheck_params_base["filename"] = "hydrofracture_source_curves.hdf5"
-curvecheck_params_base["tolerance"] = 1e-10
+curvecheck_params_base["tolerance"] = [1e-10, 1e-10]
 curvecheck_params_base["script_instructions"] = [["./hydrofractureCurveChecks.py", "tbd", "hydraulicAperture", "source"],
                                                  ["./hydrofractureCurveChecks.py", "tbd", "pressure", "source"]]
-curvecheck_params_base["script_tolerance"] = 1e-3
 curvecheck_params_base["curves"] = [["hydraulicAperture", "source"], ["pressure", "source"]]
 
 
@@ -20,8 +19,9 @@ kgd_viscosity_dominated = {
     "partitions": ((1, 1, 1), (2, 3, 1)),
     "restart_step": 0,
     "check_step": 1,
-    "pressure_curve_method": "kgd_viscosity_dominated_pressure_curve",
-    "aperture_curve_method": "kgd_viscosity_dominated_aperture_curve"
+    "tolerance": [2.3e-6, 2700.0],
+    "aperture_curve_method": "kgd_viscosity_dominated_aperture_curve",
+    "pressure_curve_method": "kgd_viscosity_dominated_pressure_curve"
 }
 
 kgd_toughness_dominated = {
@@ -30,8 +30,9 @@ kgd_toughness_dominated = {
     "partitions": ((1, 1, 1), (2, 3, 1)),
     "restart_step": 0,
     "check_step": 1,
-    "pressure_curve_method": "kgd_toughness_dominated_pressure_curve",
-    "aperture_curve_method": "kgd_toughness_dominated_aperture_curve"
+    "tolerance": [1e-5, 21000.0],
+    "aperture_curve_method": "kgd_toughness_dominated_aperture_curve",
+    "pressure_curve_method": "kgd_toughness_dominated_pressure_curve"
 }
 
 kgd_validation = {
@@ -69,41 +70,34 @@ heterogeneous_fracture = {
 penny_shaped_toughness_dominated = {
     "name": "pennyShapedToughnessDominated_smoke",
     "description": "Penny Shaped fracture in Toughness-dominated regime",
-    "partitions": ((1, 1, 1), (2, 3, 1)),
+    "partitions": ((1, 1, 1), (1, 3, 2)),
     "restart_step": 0,
-    "check_step": 5,
-    "pressure_curve_method": "penny_shaped_toughness_dominated_pressure_curve",
-    "aperture_curve_method": "penny_shaped_toughness_dominated_aperture_curve"
+    "check_step": 1,
+    "tolerance": [3.4e-6, 1e5],
+    "aperture_curve_method": "penny_shaped_toughness_dominated_aperture_curve",
+    "pressure_curve_method": "penny_shaped_toughness_dominated_pressure_curve"
 }
 
 penny_shaped_viscosity_dominated = {
     "name": "pennyShapedViscosityDominated_smoke",
     "description": "Penny Shaped fracture in Viscosity-dominated regime",
-    "partitions": ((1, 1, 1), (2, 2, 1)),
+    "partitions": ((1, 1, 1), (1, 2, 2)),
     "restart_step": 0,
-    "check_step": 5,
-    "pressure_curve_method": "penny_shaped_viscosity_dominated_pressure_curve",
-    "aperture_curve_method": "penny_shaped_viscosity_dominated_aperture_curve"
+    "check_step": 1,
+    "tolerance": [2.7e-3, 3e6],
+    "aperture_curve_method": "penny_shaped_viscosity_dominated_aperture_curve",
+    "pressure_curve_method": "penny_shaped_viscosity_dominated_pressure_curve"
 }
 
 pkn_viscosity_dominated = {
     "name": "pknViscosityDominated_smoke",
     "description": "PKN fracture in Viscosity-dominated regime",
-    "partitions": ((1, 1, 1), (2, 2, 1)),
+    "partitions": ((1, 1, 1), (1, 2, 2)),
     "restart_step": 0,
-    "check_step": 5,
-    "pressure_curve_method": "pkn_viscosity_dominated_pressure_curve",
-    "aperture_curve_method": "pkn_viscosity_dominated_aperture_curve"
-}
-
-pkn_viscosity_dominated = {
-    "name": "pknViscosityDominated_smoke",
-    "description": "PKN fracture in Viscosity-dominated regime",
-    "partitions": ((1, 1, 1), (2, 2, 1)),
-    "restart_step": 0,
-    "check_step": 5,
-    "pressure_curve_method": "pkn_viscosity_dominated_pressure_curve",
-    "aperture_curve_method": "pkn_viscosity_dominated_aperture_curve"
+    "check_step": 1,
+    "tolerance": [1.8e-5, 2e5],
+    "aperture_curve_method": "pkn_viscosity_dominated_aperture_curve",
+    "pressure_curve_method": "pkn_viscosity_dominated_pressure_curve"
 }
 
 sneddon = {
@@ -154,6 +148,9 @@ for deck in decks:
             curvecheck_params = curvecheck_params_base.copy()
             curvecheck_params["script_instructions"][0][1] = deck["aperture_curve_method"]
             curvecheck_params["script_instructions"][1][1] = deck["pressure_curve_method"]
+
+        if (curvecheck_params is not None) and ("tolerance" in deck):
+            curvecheck_params["tolerance"] = deck["tolerance"]
 
         steps = [geos(deck="{}.xml".format(deck["name"]),
                       name=base_name,

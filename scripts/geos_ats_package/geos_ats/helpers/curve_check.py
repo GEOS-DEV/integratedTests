@@ -95,7 +95,7 @@ def check_diff(parameter_name, set_name, target, baseline, tolerance, errors, mo
         errors.append(f'{modifier}_{parameter_name}_{set_name} diff exceeds tolerance: ||t-b||={diff}, {modifier}_tolerance={tolerance}')
 
 
-def curve_check_figure(parameter_name, set_name, data, data_sizes, output_root, ncol, units_time):
+def curve_check_figure(parameter_name, location_str, set_name, data, data_sizes, output_root, ncol, units_time):
     """
     Generate figures associated with the curve check
 
@@ -114,9 +114,9 @@ def curve_check_figure(parameter_name, set_name, data, data_sizes, output_root, 
              'script': {'marker': '', 'linestyle': ':'}}
     time_key = f'{parameter_name} Time'
     value_key = f'{parameter_name} {set_name}'
-    location_key = f'{parameter_name} ReferencePosition {set_name}'
+    location_key = f'{parameter_name} {location_str} {set_name}'
     s = data_sizes[parameter_name][set_name]
-    N = s[list(s.keys())[0]]
+    N = list(s[list(s.keys())[0]])
     nrow = int(np.ceil(float(N[2]) / ncol))
     time_scale = unit_map[units_time]
     horizontal_label = f'Time ({units_time})'
@@ -127,8 +127,8 @@ def curve_check_figure(parameter_name, set_name, data, data_sizes, output_root, 
         ax = plt.subplot(nrow, ncol, ii + 1)
         for k in s.keys():
             t = np.squeeze(data[k][time_key]) / time_scale
-            x = np.squeeze(data[k][value_key][:, :, ii])
-            position = np.squeeze(data[k][location_key][0, :, 0])
+            x = data[k][value_key][:, :, ii]
+            position = data[k][location_key][0, :, 0]
 
             if (N[1] == 1):
                 ax.plot(t, x, label=k, **style[k])
@@ -184,13 +184,15 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
     files = {'target': fname, 'baseline': baseline}
     warnings = []
     errors = []
+    location_string_options = ['ReferencePosition', 'elementCenter']
+    location_strings = {}
 
     # Load data and check sizes
     data = {}
     data_sizes = {}
     for k, f in files.items():
         if os.path.isfile(f):
-            data[k] = hdf5_wrapper.hdf5_wrapper(f)
+            data[k] = hdf5_wrapper.hdf5_wrapper(f).get_copy()
         else:
             errors.append(f'{k} file not found: {f}')
             continue
@@ -204,24 +206,46 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
                 errors.append(f'Set not found in {k} file: {s}')
                 continue
 
+            # Check for a location string (this may not be consistent across the same file)
+            for kb in data[k].keys():
+                for kc in location_string_options:
+                    if (kc in kb) and (p in kb):
+                        location_strings[p] = kc
+
+            if p not in location_strings:
+                test_keys = ', '.join(location_string_options)
+                all_keys = ', '.join(data[k].keys())
+                errors.append(f'Could not find location string for parameter: {p}, search_options=({test_keys}), all_options={all_keys}')
+
             # Check data sizes in the initial loop to make later logic easier
             if p not in data_sizes:
                 data_sizes[p] = {}
             if s not in data_sizes[p]:
                 data_sizes[p][s] = {}
-            data_sizes[p][s][k] = np.shape(data[k][f'{p} {s}'])
+            data_sizes[p][s][k] = list(np.shape(data[k][f'{p} {s}']))
 
     # Generate script-based curve
     if script_instructions and (len(data) > 0):
         data['script'] = {}
         try:
             for script, fn, p, s in script_instructions:
+                k = location_strings[p]
                 data['script'][f'{p} Time'] = data['target'][f'{p} Time']
-                data['script'][f'{p} ReferencePosition {s}'] = data['target'][f'{p} ReferencePosition {s}']
+                data['script'][f'{p} {k} {s}'] = data['target'][f'{p} {k} {s}']
                 data['script'][f'{p} {s}'] = evaluate_external_script(script, fn, data['target'])
-                data_sizes[p][s]['script'] = np.shape(data['script'][f'{p} {s}'])
+                data_sizes[p][s]['script'] = list(np.shape(data['script'][f'{p} {s}']))
         except Exception as e:
             errors.append(str(e))
+
+    # Reshape data if necessary so that they have a predictable number of dimensions
+    for k in data.keys():
+        for p, s in curve:
+            if (len(data_sizes[p][s][k]) == 1):
+                data[k][f'{p} {s}'] = np.reshape(data[k][f'{p} {s}'], (-1, 1, 1))
+                data_sizes[p][s][k].append(1)
+            elif (len(data_sizes[p][s][k]) == 2):
+                data[k][f'{p} {s}'] = np.expand_dims(data[k][f'{p} {s}'], -1)
+                data_sizes[p][s][k].append(1)
 
     # Check data diffs
     size_err = '{}_{} values have different sizes: target=({},{},{}) baseline=({},{},{})'
@@ -253,7 +277,7 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
     os.makedirs(output, exist_ok=True)
     for p, set_data in data_sizes.items():
         for s, set_sizes in set_data.items():
-            curve_check_figure(p, s, data, data_sizes, output, output_n_column, units_time)
+            curve_check_figure(p, location_strings[p], s, data, data_sizes, output, output_n_column, units_time)
 
     return warnings, errors
 

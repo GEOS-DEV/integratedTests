@@ -8,7 +8,7 @@ curvecheck_params = {}
 curvecheck_params['filename'] = 'veloc_history.hdf5'
 curvecheck_params['tolerance'] = 1e-10
 curvecheck_params['time_units'] = 'milliseconds'
-curvecheck_params['curve'] = [['Velocity', 'source']]
+curvecheck_params['curves'] = [['velocity', 'source']]
 
 
 partitions = ((1, 1, 1), (2, 2, 2), (3, 3, 3))

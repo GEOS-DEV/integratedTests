@@ -658,6 +658,8 @@ class curvecheck(CheckTestStepBase):
         TestParam("curves", "A list of parameter, setname value pairs."),
         TestParam("tolerance", "Curve check tolerance, default is 0.0."),
         TestParam("warnings_are_errors", "Treat warnings as errors, default is True."),
+        TestParam("script_instructions", "A list of (path, function, value, setname) entries"),
+        TestParam("script_tolerance", "Curve check tolerance for curves, default is 0.0"),
         TestParam("time_units", "Time units to use for plots."))
 
     def __init__(self, curvecheck_params, **kw):
@@ -713,6 +715,11 @@ class curvecheck(CheckTestStepBase):
             args += ["-t", self.p.tolerance]
         if self.p.time_units is not None:
             args += ["-u", self.p.time_units]
+        if self.p.script_instructions is not None:
+            for script, fn, p, s in self.p.script_instructions:
+                args += ["-s", script, fn, p, s]
+        if self.p.script_tolerance is not None:
+            args += ["-a", self.p.script_tolerance]
         if self.p.warnings_are_errors:
             args += ["-w"]
 

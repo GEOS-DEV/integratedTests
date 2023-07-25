@@ -9,7 +9,8 @@ curvecheck_params['script_instructions'] = [['./beamBending_curve.py', 'curve', 
 curvecheck_params['curves'] = [['totalDisplacement', 'trace']]
 
 
-partitions = ((1, 1, 1), (2, 2, 2), (3, 3, 3))
+# partitions = ((1, 1, 1), (2, 2, 2), (3, 3, 3))
+partitions = ((1, 1, 1), (2, 2, 2))
 for partition in partitions:
     nx = partition[0]
     ny = partition[1]

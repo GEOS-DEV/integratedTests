@@ -72,7 +72,7 @@ penny_shaped_toughness_dominated = {
     "description": "Penny Shaped fracture in Toughness-dominated regime",
     "partitions": ((1, 1, 1), (1, 3, 2)),
     "restart_step": 0,
-    "check_step": 1,
+    "check_step": 5,
     "tolerance": [3.4e-6, 1e5],
     "aperture_curve_method": "penny_shaped_toughness_dominated_aperture_curve",
     "pressure_curve_method": "penny_shaped_toughness_dominated_pressure_curve"
@@ -83,7 +83,7 @@ penny_shaped_viscosity_dominated = {
     "description": "Penny Shaped fracture in Viscosity-dominated regime",
     "partitions": ((1, 1, 1), (1, 2, 2)),
     "restart_step": 0,
-    "check_step": 1,
+    "check_step": 5,
     "tolerance": [2.7e-3, 3e6],
     "aperture_curve_method": "penny_shaped_viscosity_dominated_aperture_curve",
     "pressure_curve_method": "penny_shaped_viscosity_dominated_pressure_curve"
@@ -94,7 +94,7 @@ pkn_viscosity_dominated = {
     "description": "PKN fracture in Viscosity-dominated regime",
     "partitions": ((1, 1, 1), (1, 2, 2)),
     "restart_step": 0,
-    "check_step": 1,
+    "check_step": 5,
     "tolerance": [1.8e-5, 2e5],
     "aperture_curve_method": "pkn_viscosity_dominated_aperture_curve",
     "pressure_curve_method": "pkn_viscosity_dominated_pressure_curve"
@@ -104,7 +104,7 @@ sneddon = {
     "name": "Sneddon_hydroFrac_smoke",
     "description": "Sneddon type problem using a conforming discretization",
     "partitions": ((1, 1, 1), (2, 2, 1)),
-    "restart_step": 5,
+    "restart_step": 1,
     "check_step": 5
 }
 

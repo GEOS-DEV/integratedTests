@@ -340,6 +340,12 @@ def summary(manager, alog, short=False):
         reporter = reporting.ReportHTML(testcases)
         reporter.report(refresh=30)
 
+    if configuration_record.config.report_text:
+        testcases = test_case.TESTS.values()
+        reporter = reporting.ReportText(testcases)
+        with open(configuration_record.config.report_text_file, "w") as filep:
+            reporter.report(filep)
+
 
 def append_geos_ats_summary(manager):
     initial_summary = manager.summary

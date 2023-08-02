@@ -24,6 +24,14 @@ kgd_viscosity_dominated = {
     "pressure_curve_method": "kgd_viscosity_dominated_pressure_curve"
 }
 
+kgd_viscosity_dominated_poroelastic = {
+    "name": "kgdViscosityDominated_poroelastic",
+    "description": "KGD fracture in viscosity-dominated regime in a poroelastic solid",
+    "partitions": ((1, 1, 1), (2, 3, 1)),
+    "restart_step": 0,
+    "check_step": 1
+}
+
 kgd_toughness_dominated = {
     "name": "kgdToughnessDominated_smoke",
     "description": "KGD fracture in toughness-dominated regime",
@@ -33,6 +41,14 @@ kgd_toughness_dominated = {
     "tolerance": [1e-5, 21000.0],
     "aperture_curve_method": "kgd_toughness_dominated_aperture_curve",
     "pressure_curve_method": "kgd_toughness_dominated_pressure_curve"
+}
+
+kgd_toughness_dominated_poroelastic = {
+    "name": "kgdToughnessDominated_poroelastic",
+    "description": "KGD fracture in toughness-dominated regime in a poroelastic solid",
+    "partitions": ((1, 1, 1), (2, 3, 1)),
+    "restart_step": 0,
+    "check_step": 1
 }
 
 kgd_validation = {
@@ -78,6 +94,14 @@ penny_shaped_toughness_dominated = {
     "pressure_curve_method": "penny_shaped_toughness_dominated_pressure_curve"
 }
 
+penny_shaped_toughness_dominated_poroelastic = {
+    "name": "pennyShapedToughnessDominated_poroelastic",
+    "description": "Penny Shaped fracture in Toughness-dominated regime in a poroelastic solid",
+    "partitions": ((1, 1, 1), (1, 3, 2)),
+    "restart_step": 0,
+    "check_step": 5
+}
+
 penny_shaped_viscosity_dominated = {
     "name": "pennyShapedViscosityDominated_smoke",
     "description": "Penny Shaped fracture in Viscosity-dominated regime",
@@ -89,6 +113,14 @@ penny_shaped_viscosity_dominated = {
     "pressure_curve_method": "penny_shaped_viscosity_dominated_pressure_curve"
 }
 
+penny_shaped_viscosity_dominated_poroelastic = {
+    "name": "pennyShapedViscosityDominated_poroelastic",
+    "description": "Penny Shaped fracture in Viscosity-dominated regime in a poroelastic solid",
+    "partitions": ((1, 1, 1), (1, 3, 2)),
+    "restart_step": 0,
+    "check_step": 5
+}
+
 pkn_viscosity_dominated = {
     "name": "pknViscosityDominated_smoke",
     "description": "PKN fracture in Viscosity-dominated regime",
@@ -98,6 +130,14 @@ pkn_viscosity_dominated = {
     "tolerance": [1.8e-5, 2e5],
     "aperture_curve_method": "pkn_viscosity_dominated_aperture_curve",
     "pressure_curve_method": "pkn_viscosity_dominated_pressure_curve"
+}
+
+pkn_viscosity_dominated_poroelastic = {
+    "name": "pknViscosityDominated_poroelastic",
+    "description": "PKN fracture in Viscosity-dominated regime in a poroelastic solid",
+    "partitions": ((1, 1, 1), (1, 2, 2)),
+    "restart_step": 0,
+    "check_step": 5
 }
 
 sneddon = {
@@ -118,14 +158,19 @@ walsh_quarter_no_chombo = {
 
 
 decks = (kgd_viscosity_dominated,
+         kgd_viscosity_dominated_poroelastic,
          kgd_toughness_dominated,
+         kgd_toughness_dominated_poroelastic,
          kgd_validation,
          kgd_edge_based_C3D6,
          kgd_node_based_C3D6,
          heterogeneous_fracture,
          penny_shaped_toughness_dominated,
+         penny_shaped_toughness_dominated_poroelastic,
          penny_shaped_viscosity_dominated,
+         penny_shaped_viscosity_dominated_poroelastic,
          pkn_viscosity_dominated,
+         pkn_viscosity_dominated_poroelastic,
          sneddon,
          walsh_quarter_no_chombo
          )

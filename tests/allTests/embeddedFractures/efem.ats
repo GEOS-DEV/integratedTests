@@ -54,7 +54,10 @@ compression_CoulombFriction = {
 }
 
 decks = (sneddon_smoke,
-         sneddon_staticCondensation_smoke
+         sneddon_staticCondensation_smoke,
+         sneddon_rotated_smoke,
+         compression_frictionless,
+         compression_CoulombFriction
         )
 
 cases = []

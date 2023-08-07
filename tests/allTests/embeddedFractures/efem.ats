@@ -1,0 +1,94 @@
+
+# Check parameters
+restartcheck_params = {}
+restartcheck_params["atol"] = 1.0E-8
+restartcheck_params["rtol"] = 4.0E-7
+
+curvecheck_params_base = {}
+curvecheck_params_base["filename"] = "displacementJump_embeddedFrac.hdf5"
+curvecheck_params_base["tolerance"] = [1e-10]
+curvecheck_params_base["script_instructions"] = [["./sneddonCurveChecks.py", "sneddon_curve_check_solution", "displacementJump"]]
+curvecheck_params_base["curves"] = [["displacementJump"]]
+
+# Define cases
+sneddon_smoke = {
+    "name": "Sneddon_embeddedFrac_smoke",
+    "description": "Sneddon with horizontal fracture",
+    "partitions": ((1, 1, 1), (2, 2, 1)),
+    "restart_step": 0,
+    "check_step": 1,
+    "curve_check": 1,
+    "tolerance": 1
+}
+
+sneddon_staticCondensation_smoke = {
+    "name": "Sneddon_embeddedFrac_staticCondensation_smoke",
+    "description": "Sneddon with horizontal fracture usic static condensation",
+    "partitions": ((1, 1, 1), (2, 2, 1)),
+    "restart_step": 0,
+    "check_step": 1
+}
+
+sneddon_rotated_smoke = {
+    "name": "SneddonRotated_smoke",
+    "description": "Sneddon with inclined fracture",
+    "partitions": ((1, 1, 1), (2, 2, 1)),
+    "restart_step": 0,
+    "check_step": 1
+}
+
+decks = (sneddon_smoke,
+         sneddon_staticCondensation_smoke
+         )
+
+cases = []
+
+for deck in decks:
+    # deck, description, partitions, restart_step, num_steps
+    for partition in deck["partitions"]:
+        nx = partition[0]
+        ny = partition[1]
+        nz = partition[2]
+        N = nx * ny * nz
+        testcase_name = "{}_{:02d}".format(deck["name"], N)
+        base_name = "0to{:d}".format(deck["check_step"])
+
+        curvecheck_params = None
+        if ("curve_check" in deck):
+            if deck["curve_check"] == 1:
+              curvecheck_params = curvecheck_params_base.copy()
+
+        if (curvecheck_params is not None) and ("tolerance" in deck):
+            curvecheck_params["tolerance"] = deck["tolerance"]
+
+        steps = [geos(deck="{}.xml".format(deck["name"]),
+                      name=base_name,
+                      np=N,
+                      ngpu=N,
+                      x_partitions=nx,
+                      y_partitions=ny,
+                      z_partitions=nz,
+                      restartcheck_params=restartcheck_params,
+                      curvecheck_params=curvecheck_params)]
+
+        if deck["restart_step"] > 0:
+            steps.append(geos(deck="{}.xml".format(deck["name"]),
+                           name="{:d}to{:d}".format(deck["restart_step"], deck["check_step"]),
+                           np=N,
+                           ngpu=N,
+                           x_partitions=nx,
+                           y_partitions=ny,
+                           z_partitions=nz,
+                           restart_file=os.path.join(testcase_name, "{}_restart_{:09d}".format(base_name, deck["restart_step"])),
+                           baseline_pattern=f"{base_name}_restart_[0-9]+\.root",
+                           allow_rebaseline=False,
+                           restartcheck_params=restartcheck_params))
+
+        tmp = TestCase(name=testcase_name,
+                 desc=deck["description"],
+                 label="auto",
+                 owner="Matteo Cusini, Jian Huang",
+                 independent=True,
+                 steps=steps)
+
+        cases.append(tmp)

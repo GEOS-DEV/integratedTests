@@ -171,8 +171,6 @@ def curve_check_figure(parameter_name, location_str, set_name, data, data_sizes,
         ax.legend(loc=2)
     plt.tight_layout()
     fig.savefig(os.path.join(output_root, f'{parameter_name}_{set_name}'), dpi=200)
-    print(os.path.join(output_root, f'{parameter_name}_{set_name}'))
-
 
 def compare_time_history_curves(fname, baseline, curve, tolerance, output, output_n_column, units_time, script_instructions):
     """

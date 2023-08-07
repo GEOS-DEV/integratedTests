@@ -192,7 +192,7 @@ def initializeConfig(configFile, configOverride, options):
     config.add("report_doc_link", bool, True, "Link against docgen (used with html reports)")
     config.add("report_doc_remake", bool, False,
                "Remake test documentation, even if it already exists (used with html reports)")
-
+    config.add("report_hdf5_file", str, "test_results.hdf5", "Location to write the hdf5 report")
     config.add("report_text", bool, True, "True if you want text results to be generated with the report action")
     config.add("report_text_file", str, "test_results.txt", "Location to write the text report")
     config.add("report_text_echo", bool, True, "If True, echo the report to stdout")

@@ -1,3 +1,5 @@
+
+
 import os
 import socket
 import subprocess
@@ -8,6 +10,7 @@ import sys
 import ats    # type: ignore[import]
 from configparser import ConfigParser
 import logging
+
 
 # Get the active logger instance
 logger = logging.getLogger('geos_ats')
@@ -330,6 +333,68 @@ class ReportTextPeriodic(ReportText):
                 utilization = totalResourcesUsed / availableResources * 100.0
                 fp.write(f"  AVAIL PROCESSOR-TIME : {ats.times.hms(availableResources )}")
                 fp.write(f"  RESOURCE UTILIZATION : {utilization:5.3g}%")
+
+
+class ReportHDF5(ReportBase):
+
+    def __init__(self, testcases):
+
+        ReportBase.__init__(self, testcases)
+
+        self.reportcases = [ReportTestCase(t) for t in testcases]
+
+        # A dictionary where the key is a status, and the value is a sequence of ReportTestCases
+        self.reportcaseResults = {}
+        for status in STATUS:
+            self.reportcaseResults[status] = [t for t in self.reportcases if t.status == status]
+
+        self.displayName = {}
+        self.displayName[FAILRUN] = "FAIL RUN"
+        self.displayName[FAILRUNOPTIONAL] = "FAIL RUN (OPTIONAL STEP)"
+        self.displayName[FAILCHECK] = "FAIL CHECK"
+        self.displayName[FAILCHECKMINOR] = "FAIL CHECK (MINOR)"
+        self.displayName[TIMEOUT] = "TIMEOUT"
+        self.displayName[NOTRUN] = "NOT RUN"
+        self.displayName[INPROGRESS] = "INPROGRESS"
+        self.displayName[FILTERED] = "FILTERED"
+        self.displayName[RUNNING] = "RUNNING"
+        self.displayName[PASS] = "PASSED"
+        self.displayName[SKIP] = "SKIPPED"
+        self.displayName[BATCH] = "BATCHED"
+        self.displayName[NOTBUILT] = "NOT BUILT"
+        self.displayName[EXPECTEDFAIL] = "EXPECTEDFAIL"
+        self.displayName[UNEXPECTEDPASS] = "UNEXPECTEDPASS"
+
+    def report(self, fname):
+        import hdf5_wrapper
+        with hdf5_wrapper.hdf5_wrapper(os.path.expanduser(fname), mode='w') as data:
+            data['test_status'] = {}
+            for status in self.displayName.keys():
+                status_label = self.displayName[status]
+                tests = self.reportcaseResults[status]
+                if len(tests):
+                    test_names = []
+                    for test in tests:
+                        t = test.testcase
+                        test_names.append(t.name)
+
+                        step = ''
+                        pathstr = ''
+                        if test.laststep:
+                            step = test.laststep.label()
+                            paths = t.resultPaths(test.laststep)
+                            pathstr = " ".join([os.path.relpath(x) for x in paths])
+
+                        data[t.name] = {
+                            'status': status_label,
+                            'path': t.path,
+                            'results': pathstr,
+                            'step': step,
+                            'duration': test.elapsed,
+                            'resources': test.resources
+                        }
+
+                    data['test_status'][status_label] = test_names
 
 
 class ReportHTML(ReportBase):

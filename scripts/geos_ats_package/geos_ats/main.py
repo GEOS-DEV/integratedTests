@@ -339,16 +339,14 @@ def summary(manager, alog, short=False):
     reporter = reporting.ReportTextPeriodic(manager.testlist)
     reporter.report(geos_atsStartTime, totalNumberOfProcessors)
 
+    print('periodic summary')
+    testcases = test_case.TESTS.values()
+    reporter = reporting.ReportHDF5(testcases)
+    reporter.report(configuration_record.config.report_hdf5_file)
+
     if configuration_record.config.report_html and configuration_record.config.report_html_periodic:
-        testcases = test_case.TESTS.values()
         reporter = reporting.ReportHTML(testcases)
         reporter.report(refresh=30)
-
-    if configuration_record.config.report_text:
-        testcases = test_case.TESTS.values()
-        reporter = reporting.ReportText(testcases)
-        with open(configuration_record.config.report_text_file, "w") as filep:
-            reporter.report(filep)
 
 
 def append_geos_ats_summary(manager):
@@ -424,6 +422,7 @@ def main():
         config.report_html_file = os.path.join(options.logs, 'test_results.html')
         config.report_text_file = os.path.join(options.logs, 'test_results.txt')
         config.report_ini_file = os.path.join(options.logs, 'test_results.ini')
+        config.report_hdf5_file = os.path.join(options.logs, 'test_results.hdf5')
 
     ats_files = check_ats_targets(options, testcases, configOverride, originalargv)
     build_ats_arguments(options, ats_files, originalargv, config)

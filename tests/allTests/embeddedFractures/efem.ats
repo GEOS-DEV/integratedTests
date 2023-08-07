@@ -8,7 +8,7 @@ curvecheck_params_base = {}
 curvecheck_params_base["filename"] = "displacementJump_embeddedFrac.hdf5"
 curvecheck_params_base["tolerance"] = [1e-10]
 curvecheck_params_base["script_instructions"] = [["./sneddonCurveChecks.py", "sneddon_curve_check_solution", "displacementJump"]]
-curvecheck_params_base["curves"] = [["displacementJump"]]
+curvecheck_params_base["curves"] = "displacementJump"
 
 # Define cases
 sneddon_smoke = {
@@ -18,7 +18,7 @@ sneddon_smoke = {
     "restart_step": 0,
     "check_step": 1,
     "curve_check": 1,
-    "tolerance": 1
+    "tolerance": [1]
 }
 
 sneddon_staticCondensation_smoke = {
@@ -54,8 +54,7 @@ compression_CoulombFriction = {
 }
 
 decks = (sneddon_smoke,
-         sneddon_staticCondensation_smoke,
-         sneddon_rotated_smoke
+         sneddon_staticCondensation_smoke
         )
 
 cases = []

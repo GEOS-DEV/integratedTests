@@ -259,12 +259,11 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
             for script, fn, p, s in script_instructions:
                 k = location_strings[p]
                 data['script'][f'{p} Time'] = data['target'][f'{p} Time']
-                if s=='empty_setName':
-                  key  = f'{p} {k}'
-                  key2 = f'{p}'
-                else:
-                  key  = f'{p} {k} {s}'
-                  key2 = f'{p} {s}'
+                key  = f'{p} {k}'
+                key2 = f'{p}'
+                if s != 'empty_setName':
+                    key  += f' {s}'
+                    key2 += f' {s}'
                 data['script'][key] = data['target'][key]
                 data['script'][key2] = evaluate_external_script(script, fn, data['target'])
                 data_sizes[p][s]['script'] = list(np.shape(data['script'][key2]))
@@ -274,11 +273,9 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
     # Reshape data if necessary so that they have a predictable number of dimensions
     for k in data.keys():
         for p, s in curve:
-            if s=='empty_setName':
-                key=f'{p}'
-            else:
-                key=f'{p}{s}'
-
+            key = f'{p}'
+            if s != 'empty_setName':
+                key += f'{s}'
             if (len(data_sizes[p][s][k]) == 1):
                 data[k][key] = np.reshape(data[k][key], (-1, 1, 1))
                 data_sizes[p][s][k].append(1)
@@ -290,10 +287,9 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
     size_err = '{}_{} values have different sizes: target=({},{},{}) baseline=({},{},{})'
     for p, set_data in data_sizes.items():
         for s, set_sizes in set_data.items():
-            if s=='empty_setName':
-                key=f'{p}'
-            else:
-                key=f'{p}{s}'
+            key = f'{p}'
+            if s != 'empty_setName':
+                key += f'{s}'
 
             if (('baseline' in set_sizes) and ('target' in set_sizes)):
                 xa = data['target'][key]

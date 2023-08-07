@@ -16,6 +16,8 @@ unit_map = {'milliseconds': 1e-3,
             'days': 60.0 * 60.0 * 24.0,
             'years': 60.0 * 60.0 * 24.0 * 365.25}
 
+DEFAULT_SET_NAME = 'empty_setName'
+
 
 def interpolate_values_time(ta, xa, tb):
     """
@@ -113,7 +115,7 @@ def curve_check_figure(parameter_name, location_str, set_name, data, data_sizes,
              'baseline': {'marker': '.', 'linestyle': ''},
              'script': {'marker': '', 'linestyle': ':'}}
     time_key = f'{parameter_name} Time'
-    if set_name=='empty_setName':
+    if set_name==DEFAULT_SET_NAME:
         value_key = f'{parameter_name}'
         location_key = f'{parameter_name} {location_str}'
     else:
@@ -211,7 +213,7 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
             continue
         
         for (p, s), t in zip(curve, tolerance):
-            if s=='empty_setName':
+            if s==DEFAULT_SET_NAME:
                 key=f'{p}'
             else:
                 key=f'{p} {s}'    
@@ -261,7 +263,7 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
                 data['script'][f'{p} Time'] = data['target'][f'{p} Time']
                 key  = f'{p} {k}'
                 key2 = f'{p}'
-                if s != 'empty_setName':
+                if s != DEFAULT_SET_NAME:
                     key  += f' {s}'
                     key2 += f' {s}'
                 data['script'][key] = data['target'][key]
@@ -274,7 +276,7 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
     for k in data.keys():
         for p, s in curve:
             key = f'{p}'
-            if s != 'empty_setName':
+            if s != DEFAULT_SET_NAME:
                 key += f'{s}'
             if (len(data_sizes[p][s][k]) == 1):
                 data[k][key] = np.reshape(data[k][key], (-1, 1, 1))
@@ -288,7 +290,7 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
     for p, set_data in data_sizes.items():
         for s, set_sizes in set_data.items():
             key = f'{p}'
-            if s != 'empty_setName':
+            if s != DEFAULT_SET_NAME:
                 key += f'{s}'
 
             if (('baseline' in set_sizes) and ('target' in set_sizes)):
@@ -335,9 +337,12 @@ def curve_check_parser():
         def __call__(self, parser, namespace, values, option_string=None):
             pairs = getattr(namespace, self.dest)
             if len(values) == 1:
-                pairs.append((values[0], 'empty_setName'))
+                pairs.append((values[0], DEFAULT_SET_NAME))
             elif len(values) == 2:
                 pairs.append((values[0], values[1]))
+            else:
+                raise Exception('Only a single value or a pair of values are expected')
+             
             setattr(namespace, self.dest, pairs)
 
     # Custom action class
@@ -355,7 +360,7 @@ def curve_check_parser():
                         values = values[2:]  # Remove the pair of values
                     else:
                         script_info.append(values[0])  # Append the single value
-                        script_info.append('empty_setName')  # Add default set name
+                        script_info.append(DEFAULT_SET_NAME)  # Add default set name
                         values = []  # Clear the remaining value
                 scripts.append(script_info)
                 

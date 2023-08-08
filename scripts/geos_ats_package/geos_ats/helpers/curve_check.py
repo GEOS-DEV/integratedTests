@@ -277,7 +277,7 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
         for p, s in curve:
             key = f'{p}'
             if s != DEFAULT_SET_NAME:
-                key += f'{s}'
+                key += f' {s}'
             if (len(data_sizes[p][s][k]) == 1):
                 data[k][key] = np.reshape(data[k][key], (-1, 1, 1))
                 data_sizes[p][s][k].append(1)
@@ -291,7 +291,7 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
         for s, set_sizes in set_data.items():
             key = f'{p}'
             if s != DEFAULT_SET_NAME:
-                key += f'{s}'
+                key += f' {s}'
 
             if (('baseline' in set_sizes) and ('target' in set_sizes)):
                 xa = data['target'][key]

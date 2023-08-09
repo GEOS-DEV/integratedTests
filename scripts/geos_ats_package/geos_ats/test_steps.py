@@ -726,7 +726,7 @@ class curvecheck(CheckTestStepBase):
 
         if self.p.curves is not None:
             for c in self.p.curves.split(';'):
-                args = ["-c"]
+                args += ["-c"]
                 args +=  c.split(',') 
         if self.p.tolerance is not None:
             for t in self.p.tolerance.split(','):
@@ -735,7 +735,7 @@ class curvecheck(CheckTestStepBase):
             args += ["-u", self.p.time_units]
         if self.p.script_instructions is not None:
             for c in self.p.script_instructions.split(';'):
-                args = ["-s"]
+                args += ["-s"]
                 args += c.split(',')
         if self.p.warnings_are_errors:
             args += ["-w"]

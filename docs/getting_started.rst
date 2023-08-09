@@ -111,7 +111,7 @@ Tests will be organized by their status variable, which includes:
 
 If each test ends up in the *PASSED* category, then you are likely done with the integrated testing procedure.
 However, if tests end up in any other category, it is your responsibility to address the failure.
-If you identify that a failure is due to an expected change in the code (e.g.: adding a new parameter to the xml structure or fixing a bug in an algorithm), you can follow the :ref:`rebaselining proceedure<Rebaselining Tests>`.
+If you identify that a failure is due to an expected change in the code (e.g.: adding a new parameter to the xml structure or fixing a bug in an algorithm), you can follow the :ref:`rebaselining procedure <rebaselining-tests>`.
 Otherwise, you will need to track down and potentially fix the issue that triggered the failure.
 
 
@@ -129,8 +129,10 @@ Using the serial beam bending test as an example, key output files include:
 * *beamBending_restart_000000010.restartcheck* which holds all of the standard output for only the *restartcheck* step.
 * *beamBending_restart_000000010.0.diff.hdf5* which mimmics the hierarchy of the restart file and has links to the 
 
-See :ref:`<Restart Check>` and :ref:`<Restart Check>` for further details on the test checks and output files.
+See :ref:`Restart Check <restart-check>` and :ref:`Curve Check <curve-check>` for further details on the test checks and output files.
 
+
+.. _restart-check:
 
 Restart Check
 =================================
@@ -249,6 +251,7 @@ This allows for easy access to the raw data underlying the diff without data dup
 When run in parallel each rank creates a *.$RANK.diff.hdf5* file which contains the diff of each data file processed by that rank.
 
 
+.. _curve-check:
 
 Curve Check
 =================================
@@ -386,7 +389,7 @@ For any given test step, we expect that at least one restart or curve check be d
 Creating a New Test Directory
 -------------------------------
 
-To add a new set of tests, create a new folder in the `integratedTests/tests/allTests* directory.
+To add a new set of tests, create a new folder in the `integratedTests/tests/allTests*` directory.
 This folder needs to include at least one *.ats* file to be included in the integrated tests.
 Using the sedov example, after creating *sedov.ats* the directory should look like
 
@@ -413,6 +416,8 @@ At this point the directory should look like this:
 
 You can then follow the steps in the next section to record the initial baseline files.
 
+
+.. _rebaselining-tests:
 
 Rebaselining Tests
 ----------------------------
@@ -565,4 +570,4 @@ We highly recommend running tests and rebaselining on an MPI-aware platform.
 
 **Filtering Checks**: A common reason for rebaselining is that you have changed the name of an XML node in the input files.
 While the baselines may be numerically identical, the restarts will fail because they contain different node names.
-In this situation, it can be useful to add a filter to the restart check script using the *geos_ats.sh* script (see the `-e` and `-m` options in :ref:`<Override Test Behavior>` )
+In this situation, it can be useful to add a filter to the restart check script using the *geos_ats.sh* script (see the `-e` and `-m` options in :ref:`Override Test Behavior` )

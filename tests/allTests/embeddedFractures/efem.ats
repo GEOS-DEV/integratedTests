@@ -8,15 +8,26 @@ curvecheck_params_base["curves"] = "displacementJump"
 # Define cases
 sneddon_smoke = {
     "name": "Sneddon_embeddedFrac_smoke",
-    "description": "Sneddon with horizontal fracture",
+    "description": "Smoke test for Sneddon's problem with horizontal fracture",
     "partitions": ((1, 1, 1), (2, 2, 1)),
     "restart_step": 0,
     "check_step": 1,
-    "perform_curvecheck": True,
+    "perform_curvecheck": False,
     "curvecheck_tol": [1],
-    "perform_restartcheck": False,
+    "perform_restartcheck": True,
     "atol": 1.0E-8,
     "rtol": 4.0E-7
+}
+
+sneddon_benchmark = {
+    "name": "Sneddon_embeddedFrac_benchmark",
+    "description": "Sneddon's problem with horizontal fracture (uses MGR)",
+    "partitions": ((1, 1, 1),),
+    "restart_step": 0,
+    "check_step": 1,
+    "perform_curvecheck": True,
+    "curvecheck_tol": [1e-5],
+    "perform_restartcheck": False,
 }
 
 sneddon_staticCondensation_smoke = {
@@ -28,6 +39,17 @@ sneddon_staticCondensation_smoke = {
     "perform_restartcheck": True,
     "atol": 1.0E-8,
     "rtol": 4.0E-7
+}
+
+sneddon_staticCondensation_benchmark = {
+    "name": "Sneddon_embeddedFrac_staticCondensation_benchmark",
+    "description": "Sneddon's problem with horizontal fracture (uses static condensation + AMG)",
+    "partitions": ((1, 1, 1),),
+    "restart_step": 0,
+    "check_step": 1,
+    "perform_curvecheck": True,
+    "curvecheck_tol": [1e-5],
+    "perform_restartcheck": False,
 }
 
 sneddon_rotated_smoke = {
@@ -64,7 +86,9 @@ compression_CoulombFriction = {
 }
 
 decks = (sneddon_smoke,
+         sneddon_benchmark,
          sneddon_staticCondensation_smoke,
+         sneddon_staticCondensation_benchmark,
          sneddon_rotated_smoke,
          compression_frictionless,
          compression_CoulombFriction
@@ -74,10 +98,10 @@ cases = []
 
 for deck in decks:
     # deck, description, partitions, restart_step, num_steps
-    for partition in deck["partitions"]:
-        nx = partition[0]
-        ny = partition[1]
-        nz = partition[2]
+    partitions = deck["partitions"]
+    num_partitions = len(partitions)
+    for i in range(num_partitions):
+        nx, ny, nz = partitions[i]
         N = nx * ny * nz
         testcase_name = "{}_{:02d}".format(deck["name"], N)
         base_name = "0to{:d}".format(deck["check_step"])

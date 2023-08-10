@@ -60,7 +60,8 @@ In most cases, integrated tests processes can be triggered in the GEOS build dir
 * `make ats_run` : Run all of the available tests (see the below note on testing resources).
 * `make ats_clean` : Remove any unnecessary files created during the testing process (.vtk, .hdf5 files, etc.)
 * `make ats_rebaseline` : Selectively update the baseline files for tests.
-* `make ats_rebaselinefailed` : Automatically update the baseline files for any failed tests.
+* `make ats_rebaseline_failed` : Automatically update the baseline files for any failed tests.
+
 
 
 .. note::

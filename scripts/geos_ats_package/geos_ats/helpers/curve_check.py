@@ -348,21 +348,14 @@ def curve_check_parser():
     # Custom action class
     class ScriptAction(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):
-            scripts = getattr(namespace, self.dest)
             
-            while values:
-                script_info = values[:2]  # Take the first two values as path and function
-                values = values[2:]  # Remove the first two values
-                
-                if values:  # If there are more values
-                    if len(values) >= 2:
-                        script_info.extend(values[:2])  # Append a pair of values
-                        values = values[2:]  # Remove the pair of values
-                    else:
-                        script_info.append(values[0])  # Append the single value
-                        script_info.append(DEFAULT_SET_NAME)  # Add default set name
-                        values = []  # Clear the remaining value
-                scripts.append(script_info)
+            scripts = getattr(namespace, self.dest)
+            scripts.append(values)
+            N = len(values)
+            if (N < 3) or (N > 4):
+                raise Exception ('The -s option requires 3 or 4 inputs')
+            elif N == 3:
+                values.append(DEFAULT_SET_NAME)
                 
             setattr(namespace, self.dest, scripts)        
 

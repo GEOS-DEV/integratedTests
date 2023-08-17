@@ -4,176 +4,171 @@ Integrated Tests
 
 About
 =================================
-*integratedTests* is a submodule of *GEOSX* residing at the top level of the directory structure. It will run *GEOSX* with various *.xml* files and compare the output against a baseline.
-
-Notes: you may need to install h5py_ and mpi4py_.
-
-.. _h5py: http://docs.h5py.org/en/latest/build.html
-.. _mpi4py: https://mpi4py.readthedocs.io/en/stable/
-
-Do not forget to retrieve the baselines with the git LFS (large file storage) plugin.
-If the content of your baselines is something like:
-
-  [somebody@somewhere:/tmp]$ cat /path/to/GEOSX/integratedTests/tests/allTests/sedov/baselines/sedov_8/0to100_restart_000000100/rank_0000003.hdf5
-  version https://git-lfs.github.com/spec/v1
-  oid sha256:09bbe1e92968852cb915b971af35b0bba519fae7cf5934f3abc7b709ea76308c
-  size 1761208
-
-then it means that the LFS plugin was not activated. ``git lfs install`` and ``git lfs pull`` should help you fix this.
+*integratedTests* is a submodule of *GEOS* residing at the top level of the directory structure.
+It defines a set of tests that will run *GEOS* with various *.xml* files and partitioning schemes using the `Automated Test System <https://ats.readthedocs.io/en/latest/>`_ (ATS).
+For each scenario, test performance is evaluated by comparing output files to baselines recorded in this repository.
 
 
 Structure
 =================================
-The *integratedTests* directory is composed of two main directories, *integratedTests/geosxats* and *integratedTests/tests/allTests*. The *integratedTests/geosxats* directory contains all the machinery involved in running the tests including the main executable *integratedTests/geosxats/geosxats*. The *integratedTests/tests/allTests* directory contains all the actual tests themselves, including the *.xml* files and the baselines.
+
+The *integratedTests* repository includes a python package (*integratedTests/scripts/geos_ats_package*) and a directory containing test definitions (*integratedTests/tests/allTests*).
+A typical test directory will include an *.ats* file, which defines the behavior of tests or points to child test directories, symbolic links to any required *.xml* files, and a directory containing baseline files.
+
 
 .. code-block:: sh
 
   - integratedTests/
-    - geosxats/
-      - geosxats
-  - update/
-    - run/
+    - scripts/
+      - geos_ats_package
+  - tests/
+    - allTests/
+      - main.ats/
       - sedov/
-      - beamBending/
         - baselines/
-          - beamBending/
+          - sedov_XX/
             - <baseline-files>
-        - beamBending.ats
-        - beamBending.xml
+        - sedov.ats
+        - sedov.xml
 
-Arguments
-=================================
-The program takes a number of arguments, the most important ones are
 
-* The path to the *GEOSX* binary directory (*<build-dir>/bin*)
-* --workingDir WORKINGDIR which sets the working (test) directory.
-* -N NUMNODES specifies the number of nodes to use the default is the minimum number that the tests require.
-* -a {veryclean, rebaseline, ...} specify a specific action, *veryclean* deletes all output files, and *rebaseline* lets you rebaseline all or some of the tests.
-* -h prints out the *geosxats* help.
+High level integrated test results are recorded in the GEOS build directory: */path/to/GEOS/build-xyz/integratedTests/TestsResults*.
+These include *.log* and *.err* files for each test and a *test_results.html* summary file, which can be inspected in your browser.
+
+
+.. note::
+  Baseline files are stored using the git LFS (large file storage) plugin.
+  If you followed the suggested commands in the quickstart guide, then your environment is likely already setup.
+
+  However, if lfs is not yet activated, then the contents of baseline files may look something like this:
+
+  0to100_restart_000000100/rank_0000003.hdf5
+  version https://git-lfs.github.com/spec/v1
+  oid sha256:09bbe1e92968852cb915b971af35b0bba519fae7cf5934f3abc7b709ea76308c
+  size 1761208
+
+  If this is the case, try running the following commands: ``git lfs install`` and ``git lfs pull``.
+
+
 
 How to Run the Tests
 =================================
-To run all the tests from the top level *GEOSX* directory you would do
 
-.. code-block:: sh
+In most cases, integrated tests processes can be triggered in the GEOS build directory with the following commands:
 
-  integratedTests/geosxats/geosxats <build-path>/bin --workingDir integratedTests/tests/allTests
+* `make ats_environment` : Setup the testing environment (Note: this step is run by default for the other make targets).  This process will install packages required for testing into the python environment defined in your current host config file.  Depending on how you have built GEOS, you may be prompted to manually run the `make pygeosx` command and then re-run this step.
+* `make ats_run` : Run all of the available tests (see the below note on testing resources).
+* `make ats_clean` : Remove any unnecessary files created during the testing process (.vtk, .hdf5 files, etc.)
+* `make ats_rebaseline` : Selectively update the baseline files for tests.
+* `make ats_rebaseline_failed` : Automatically update the baseline files for any failed tests.
 
 
-To run only the *sedov* tests you would do
 
-.. code-block:: sh
+.. note::
+  Running the integrated tests requires significant computational resources.
+  If you are on a shared system, we recommend that you only run `make ats_run` within an allocation.
 
-  integratedTests/geosxats/geosxats <build-path>/bin --workingDir integratedTests/tests/allTests/sedov
 
-However if you want to run all the tests there's an easier way. In the build directory there's a symbolic link to *integratedTests/tests/allTests* called *integratedTests* and a bash script *geosxats.sh* that wraps *integratedTests/geosxats/geosxats* and passes it the path to the binary directory and the *integratedTests/tests/allTests* directory along with any other command line arguments. To run this script do the following
+.. note::
+  We forward any arguments included in the `ATS_ARGUMENTS` cmake variable to the testing system.
+  For example, on LLNL Lassen builds we select a couple of runtime options:
+  set(ATS_ARGUMENTS "--ats jsrun_omp --ats jsrun_bind=packed"  CACHE STRING "")
 
-.. code-block:: sh
 
-  cd <build-path>
-  ./geosxats.sh
+.. note::
+  When running test or creating new baselines on LC systems, we recommend that you use the *quartz-gcc-12-release* configuration
 
-If the script or symbolic link is not present you will need to reconfigure by running the `config-build.py script.
 
-When the program has finished running you will see something like this
+Override Test Behavior
+-------------------------
 
-.. code-block:: sh
+For cases where you need additional control over the integrated tests behavior, you can use this script in your build directory: */path/to/GEOS/build-xyz/integratedTests/geos_ats.sh*.
+To run the tests, simply call this script with any desired arguments (see the output of `geos_ats.sh --help` for additional details.)
+Common options for this script include:
 
-   FAIL RUN : 0
+* -a/--action : The type of action to run.  Common options include: `run`, `veryclean`, `rebaseline`, and `rebaselinefailed`.
+* -r/--restartCheckOverrides : Arguments to pass to the restart check function.  Common options include: `skip_missing` (ignores any new/missing values in restart files) and `exclude parameter1 parameter2` (ignore these values in restart files).
+* --machine : Set the ats machine type name.
+* --ats : Pass an argument to the underlying ats framework.  Running `geos_ats.sh --ats help` will show you a list of available options for your current machine.
 
-   UNEXPECTEDPASS : 0
 
-   FAIL RUN (OPTIONAL STEP) : 0
 
-   FAIL CHECK : 1
-   (  beamBending  )
-
-   FAIL CHECK (MINOR) : 0
-
-   TIMEOUT : 0
-
-   NOT RUN : 0
-
-   INPROGRESS : 0
-
-   FILTERED : 0
-
-   RUNNING : 0
-
-   PASSED : 3
-   (  sedov 2D_100x100_incompr_linear 2D_100x100_incompr_linear_faceBC  )
-
-   EXPECTEDFAIL : 0
-
-   SKIPPED : 0
-
-   BATCHED : 0
-
-   NOT BUILT : 0
-
-    TOTAL TIME           : 0:01:13
-    TOTAL PROCESSOR-TIME : 0:02:13
-    AVAIL PROCESSOR-TIME : 1:28:26
-    RESOURCE UTILIZATION :  2.51%
-
-    LONGEST RUNNING TESTS:
-       0:01:13 sedov
-       0:00:23 2D_100x100_incompr_linear_faceBC
-       0:00:22 2D_100x100_incompr_linear
-       0:00:14 beamBending
-
-       Status     :  TestCase    :  Directory               :  Elapsed :  Resources :  TestStep
-       ---------- :  ----------- :  ----------------------- :  ------- :  --------- :  ------------
-       FAIL CHECK :  beamBending :  beamBending/beamBending :  0:00:14 :  0:00:14   :  restartcheck
-       ---------- :  ----------- :  ----------------------- :  ------- :  --------- :  ------------
-
-  Generating HTML documentation files (running 'atddoc')...
-    Failed to create HTML documentation in /g/g14/corbett5/geosx/mirror/integratedTests/update/doc
-
-  Undocumented test problems:
-  beamBending 2D_100x100_incompr_linear 2D_100x100_incompr_linear_faceBC sedov
-
-Ignore the error regarding the failure to create a HTML documentation file and the warning about the undocumented test problems. The only important thing is if any of the tests aren't in the *PASSED* category. For a nice summary of the results open the *test_results.html* file in the *geosxats* working directory.
-
-When running the tests multiple times in a row, only tests that failed to pass will run. If you would like to run all the tests again call
-
-.. code-block:: sh
-
-  ./geosxats.sh -a veryclean
-
-which will delete all the generated files. Furthermore these generated files are not ignored by *git*, so until you run *veryclean* the *integratedTests* repo will register changes.
-
-**Note**: On some development machines geosxats won't run parallel tests by default (e.g. on an linux laptop or workstation), and as a result many tests will be skipped.  We highly recommend running tests on an MPI-aware platform.
-
-Output Created By a Test
+Inspecting Test Results
 =================================
-Since the *beamBending* test failed let's look at it's output. The output for the *beamBending* test is stored in *integratedTests/tests/allTests/beamBending/beamBending* directory. In addition to any files *GEOSX* itself creates you will find
 
-* *beamBending.data* which holds all of the standard output of the various steps.
-* *beamBending.err* which holds all of the standard error output of the various steps.
-* *beamBending.geosx.out* which holds all of the standard output for only the *geosx* step.
-* *beamBending_restart_000000003.restartcheck* which holds all of the standard output for only the *restartcheck* step.
-* *beamBending_restart_000000003_diff.hdf5* which mimmics the hierarchy of the restart file and has links to the differing data datasets.
+While the tests are running, the name and size of the active test will be periodically printed out to the screen.
+Test result summaries will also be periodically written to the screen and files in */path/to/GEOS/build-xyz/integratedTests/TestsResults*.
+For most users, we recommend inspecting the *test_results.html* file in your browser (e.g.: `firefox integratedTests/TestsResults/test_results.html`).
+Tests will be organized by their status variable, which includes:
 
-The RestartCheck File
----------------------------------
-Currently the only manner of check that we support is a restart check, this check compares a restart file output at the end of a run against a baseline. The program that does the diff
-is *integratedTests/geosxats/helpers/restartcheck.py*. The program compares the two restart files and writes out a *.restart_check* file with the results, as well as exiting with an error code if the files compare differently.
 
-This program takes a number of arguments
-and they are as follows
+* *RUNNING* : The test is currently running
+* *NOT RUN* : The test is waiting to start
+* *PASSED* : The test and associated checks succeeded
+* *FAIL RUN* : The test was unable to run (this often occurs when there is an error in the .ats file)
+* *FAIL CHECK* : The test ran to completion, but failed either its restart or curve check
+* *SKIPPED* : The test was skipped (likely due to lack of computational resources)
 
-* Regex specifying the restart file. If the regex matches multiple files the one with the greater string is selected. For example *restart_100.hdf5* wins out over *restart_088.hdf5*.
-* Regex specifying the baseline file.
-* -r The relative tolerance for floating point comparison, the default is 0.0.
-* -a The absolute tolerance for floating point comparison, the default is 0.0.
-* -e A list of regex expressions that match paths in the restart file tree to exclude from comparison. The default is [.*/commandLine].
-* -w Force warnings to be treated as errors, default is false.
-* -s Suppress output to stdout, default is False.
 
-The *.restart_check* file itself starts off with a summary of the arguments. The program then compares the *.root* files and if they are similar proceeds to compare all the *.hdf5* data files.
+If each test ends up in the *PASSED* category, then you are likely done with the integrated testing procedure.
+However, if tests end up in any other category, it is your responsibility to address the failure.
+If you identify that a failure is due to an expected change in the code (e.g.: adding a new parameter to the xml structure or fixing a bug in an algorithm), you can follow the :ref:`rebaselining procedure <rebaselining-tests>`.
+Otherwise, you will need to track down and potentially fix the issue that triggered the failure.
 
-If the program encounters any differences it will spit out an error message. An error message for scalar values looks as follows
+
+Test Output
+--------------------------------
+
+Output files from the tests will be stored in the TestResults directory (*/path/to/GEOS/build-xyz/integratedTests/TestsResults*) or in a subdirectory next to their corresponding *.xml* file (*integratedTests/tests/allTests/testGroup/testName_xx*).
+Using the serial beam bending test as an example, key output files include:
+
+* *beamBending_01.data* : Contains the standard output for all test steps.
+* *beamBending_01.err* :  Contains the standard error output for all test steps.
+* *displacement_history.hdf5* : Contains time history information that is used as an input to the curve check step.
+* *totalDisplacement_trace.png* : A figure displaying the results of the curve check step.
+* *beamBending.geos.out* : Contains the standard output for only the geos run step.
+* *beamBending_restart_000000010.restartcheck* which holds all of the standard output for only the *restartcheck* step.
+* *beamBending_restart_000000010.0.diff.hdf5* which mimmics the hierarchy of the restart file and has links to the 
+
+See :ref:`Restart Check <restart-check>` and :ref:`Curve Check <curve-check>` for further details on the test checks and output files.
+
+
+.. _restart-check:
+
+Restart Check
+=================================
+
+This check compares a restart file output at the end of a run against a baseline. 
+The python script that evaluates the diff is included in the `geos_ats` package, and is located here: *integratedTests/scripts/geos_ats_package/geos_ats/helpers/restart_check.py*.
+The script compares the two restart files and writes out a *.restart_check* file with the results, as well as exiting with an error code if the files compare differently.
+This script takes two positional arguments and a number of optional keyword arguments:
+
+* file_pattern : Regex specifying the restart file. If the regex matches multiple files the one with the greater string is selected. For example *restart_100.hdf5* wins out over *restart_088.hdf5*.
+* baseline_pattern : Regex specifying the baseline file.
+* -r/--relative : The relative tolerance for floating point comparison, the default is 0.0.
+* -a/--absolute : The absolute tolerance for floating point comparison, the default is 0.0.
+* -e/--exclude : A list of regex expressions that match paths in the restart file tree to exclude from comparison. The default is [.*/commandLine].
+* -w/-Werror : Force warnings to be treated as errors, default is false.
+* -m/--skip-missing : Ignore values that are missing from either the baseline or target file.
+
+The  itself starts off with a summary of the arguments.
+The script begins by recording the arguments to the *.restart_check* file header, and then compares the *.root* restart files to their baseline.
+If these match, the script will compare the linked *.hdf5* data files to their baseline.
+If the script encounters any differences it will output an error message, and record a summary to the *.restart_check* file.
+
+The restart check step can be run in parallel using mpi via
+
+.. code-block:: sh
+
+  mpirun -n NUM_PROCESSES python -m mpi4py restartcheck.py ...
+
+In this case rank zero reads in the restart root file and then each rank parses a subset of the data files creating a *.$RANK.restartcheck* file. Rank zero then merges the output from each of these files into the main *.restartcheck* file and prints it to standard output.
+
+
+Scalar Error Example
+-------------------------------
+
+An error message for scalar values looks as follows
 
 .. code-block:: sh
 
@@ -181,6 +176,10 @@ If the program encounters any differences it will spit out an error message. An 
     Scalar values of types float64 and float64 differ: 22500000000.0, 10000022399.9.
 
 Where the first value is the value in the test's restart file and the second is the value in the baseline.
+
+
+Array Error Example
+--------------------------------
 
 An example of an error message for arrays is
 
@@ -219,23 +218,20 @@ An sample error message is
       max = 16492717650.3, mean = 3430023217.52, std = 4680859258.74
     Statistics of the q values greater than 1.0 defined by the relative tolerance: N = 0
 
-The restart check step can be run in parallel using mpi via
-
-.. code-block:: sh
-
-  mpirun -n NUM_PROCESSES python -m mpi4py restartcheck.py ...
-
-In this case rank zero reads in the restart root file and then each rank parses a subset of the data files creating a *.$RANK.restartcheck* file. Rank zero then merges the output from each of these files into the main *.restartcheck* file and prints it to standard output.
 
 The *.diff.hdf5* File
 ---------------------------------
-Each error generated in the *restartcheck* step creates a group with three children in the *_diff.df5* file. For example the error given above will generate a hdf5 group
+
+Each error generated in the *restartcheck* step creates a group with three children in the *_diff.df5* file.
+For example the error given above will generate a hdf5 group
 
 .. code-block:: sh
 
   /FILENAME/datagroup_0000000/sidre/external/ProblemManager/domain/MeshBodies/mesh1/Level0/nodeManager/TotalDisplacement
 
-with datasets *baseline*, *run* and *message* where *FILENAME* is the name of the restart data file being compared. The *message* dataset contains a copy of the error message while *baseline* is a symbolic link to the baseline dataset and *run* is a sumbolic link to the dataset genereated by the run. This allows for easy access to the raw data underlying the diff without data duplication. For example if you want to extract the datasets into python you could do this:
+with datasets *baseline*, *run* and *message* where *FILENAME* is the name of the restart data file being compared.
+The *message* dataset contains a copy of the error message while *baseline* is a symbolic link to the baseline dataset and *run* is a sumbolic link to the dataset genereated by the run.
+This allows for easy access to the raw data underlying the diff without data duplication. For example if you want to extract the datasets into python you could do this:
 
 .. code-block:: python
 
@@ -255,217 +251,324 @@ with datasets *baseline*, *run* and *message* where *FILENAME* is the name of th
 
 When run in parallel each rank creates a *.$RANK.diff.hdf5* file which contains the diff of each data file processed by that rank.
 
-The *.ats* File
+
+.. _curve-check:
+
+Curve Check
 =================================
-The *.ats* file is a python script that describes the *TestCases* to run and steps for each *TestCase*. Each *.ats* file needs to have at least one *TestCase* and each *TestCase* needs to have at least one step.
 
-A simple example is the *beamBending.ats* file
+This check compares time history (*.hdf5*) curves generated during GEOS execution against baseline and/or analytic solutions.
+In contrast to restart checks, curve checks are designed to be flexible with regards to things like mesh construction, time stepping, etc.
+The python script that evaluates the diff is included in the `geos_ats` package, and is located here: *integratedTests/scripts/geos_ats_package/geos_ats/helpers/curve_check.py*.
+The script renders the curve check results as a figure, and will throw an error if curves are out of tolerance.
+This script takes two positional arguments and a number of optional keyword arguments:
 
-.. code-block:: python
+* filename : Path to the time history file.
+* baseline : Path to the baseline file.
+* -c/--curve : Add a curve to the check (value) or (value, setname).  Multiple curves are allowed.
+* -s/--script : Python script instructions for curve comparisons (path, function, value, setname)
+* -t/--tolerance : The tolerance for each curve check diffs (||x-y||/N).  Default is 0.
+* -w/-Werror : Force warnings to be treated as errors, default is false.
+* -o/--output : Output figures to this directory.  Default is ./curve_check_figures
+* -n/--n-column : Number of columns to use for the output figure.  Default is 1.
+* -u/--units-time : Time units for plots.  Options include milliseconds, seconds (default), minutes, hours, days, years
 
-  TestCase(
-    name = "beamBending",
-    desc = "Tests beam bending.",
-    label = "auto",
-    owner = "Ben Corbett",
-    independent = True,
-    steps = (geosx(deck="beamBending.xml"),)
 
-This creates a *TestCase* called beamBending with a single step that runs *GEOSX* with the *beamBending.xml* input file, a *restartcheck* step automatically follows each *geosx* step. So this file describes a test that runs the *beamBending* problem and compares the restart file against the baseline.
+The curve check script begins by checking the target time history file for expected key values.
+These include the time array ("value Time"), location array ("value ReferencePosition setname" or "value elementCenter setname"), and value array ("value setname").
+Any missing values will be recorded as errors in the output.
 
-A slightly more complicated example is the *singlePhaseFlow.ats* file.
+The script will then run and record any user-requested python script instructions.
+To do this, python will attempt to import the file given by *path* and evaluate the target function, which should accept the time history data as keyword arguments.
+Note: to avoid side effects, please ensure that any imported scripts are appropriately guarded if they also allow direct execution:
 
-.. code-block:: python
-
-  decks = ("2D_100x100_incompr_linear",
-           "2D_100x100_incompr_linear_faceBC")
-  descriptions = ("Testing the single phase incompressible flow solver.",
-                  "Testing the single phase incompressible flow solver with face boundary conditions.")
-
-  for i in range(len(decks)):
-      deck = decks[i]
-      description = descriptions[i]
-      TestCase(
-          name = deck,
-          desc = description,
-          label = "auto",
-          owner = "Ben Corbett",
-          independent = True,
-          steps = (geosx(deck=deck + ".xml"),)
-      )
-
-This creates two *TestCases* each of which runs a different problem. The *independent* parameter means that the two *TestCases* can be executed independently of each other. When a *TestCase* executes it uses it's name to create a directory where all the output files are stored so if you have multiple *TestCases* in an *.ats* file it's imperative that they have unique names.
-
-Finally there's the *sedov.ats* file which tests that starting from a restart file has no impact on the final solution.
 
 .. code-block:: python
 
-  import os
+  if __name__ == '__main__':
+    main()
 
-  TestCase(
-      name = "sedov",
-      desc = "Test the basic sedov problem and restart capabilities.",
-      label = "auto",
-      owner = "Ben Corbett",
-      independent = True,
-      steps = (geosx(deck="sedov.xml",
-                     name="0to100"),
-               geosx(deck="sedov.xml",
-                     name="50to100",
-                     restart_file=os.path.join(testcase_name, "0to100_restart_000000050.root"),
-                     baseline_pattern="0to100_restart_[0-9]+\.root",
-                     allow_rebaseline=False)
-              )
-  )
 
-This creates a single *TestCase* That executes *GEOSX* twice. The first step does 100 time steps followed by a *restartcheck* step. The second *geosx* step executes the original 100 time step *xml* file but restarts using the restart file output half way through the first run. Each *geosx* step gets its name from the *xml* file, but this can be overridden by the *name* parameter Furthermore the default behavior is to look for a baseline in the *baselines/<TestCaseName>* directory named *TestStepName_restart_[0-9]+\.root*, however the second step overrides this to instead compare against the "0to100" baseline. Because of this it does not allow rebaselining.
+This script will then check the size of the time history items, and will attempt to interpolate them if they do not match (currently, we only support interpolation in time).
+Finally, the script will compare the time history values to the baseline values and any script-generated values.
+If any curves do not match (`||x-y||/N > tol`), this will be recorded as an error.
 
-You can pass parameters to the *restartcheck* step in a dictionary passed as an argument to the *geosx* step. For example to set the tolerance you would do
 
-.. code-block:: python
+Item Not Found Errors
+----------------------------
 
-  restartcheck_params={}
-  restartcheck_params["atol"] = 1.5E-10
-  restartcheck_params["rtol"] = 1E-12
-
-  TestCase(
-      name = "sedov",
-      desc = "Test the basic sedov problem and restart capabilities.",
-      label = "auto",
-      owner = "Ben Corbett",
-      independent = True,
-      steps = (geosx(deck="sedov.xml",
-                     name="0to100",
-                     restartcheck_params=restartcheck_params))
-  )
-
-For more info see *integratedTests/geosxats/GeosxAtsTestSteps.py* and *integratedTests/geosxats/GeosxAtsTestCase.py*
-
-Adding a Test
-=================================
-To add a new test create a new folder in the `integratedTests/tests/allTests* directory. At a minimum this new folder needs to include an *.ats* file. Using the beamBending example, after creating *beamBending.ats* the directory should look like
+The following error would indicate that the requested baseline file was not found:
 
 .. code-block:: sh
 
-  - integratedTests/tests/allTests/beamBending/
-    - beamBending.ats
-    - beamBending.xml
+  baseline file not found: /path/to/baseline/file
 
-At this point you should run the test. Assuming the *geosx* step is successful the *restartcheck* step will fail because there are no baselines. At this point the directory should look like
+
+This type of error can occur if you are adding a new test, or if you time history output failed.
+
+
+
+The following errors would indicate that values were not found in time history files:
 
 .. code-block:: sh
 
-  - integratedTests/tests/allTests/beamBending/
-    - beamBending/
+  Value not found in target file: value
+  Set not found in target file: setname
+  Could not find location string for parameter: value, search...
+  
+
+The following error would indicate that a given curve exceeded its tolerance compared to script-generated values:
+
+
+.. code-block:: sh
+
+  script_value_setname diff exceeds tolerance: ||t-b||/N=100.0, script_tolerance=1.0
+
+
+
+Adding and Modifying Tests
+=================================
+
+
+ATS Configuration File
+---------------------------------
+
+Files with the *.ats* extension are used to configure the integratedTests.
+They use a Python 3.x syntax, and have a set of ATS-related methods loaded into the scope (TestCase, geos, source, etc.).
+The root configuration file (*integratedTests/tests/allTests/main.ats*) finds and includes any test definitions in its subdirectories.
+The remaining configuration files typically add one or more tests with varying partitioning and input xml files to ATS.
+
+The *integratedTests/tests/allTests/sedov/sedov.ats* file shows how to add three groups of tests.
+This file begins by defining a set of common parameters, which are used later:
+
+.. literalinclude:: ../../../../../integratedTests/tests/allTests/sedov/sedov.ats
+  :language: python
+  :start-after: # Integrated Test Docs Begin Parameters
+  :end-before: # Integrated Test Docs End Parameters
+
+
+It then enters over the requested partitioning schemes: 
+
+.. literalinclude:: ../../../../../integratedTests/tests/allTests/sedov/sedov.ats
+  :language: python
+  :start-after: # Integrated Test Docs Begin Test Loop
+  :end-before: # Integrated Test Docs End Test Loop
+
+
+and registers a unique test case with the `TestCase` method, which accepts the following arguments:
+
+* name : The name of the test.  The expected convention for this variable is 'testName_N' (N = number of ranks) or 'testName_X_Y_Z' (X, Y, and Z ranks per dimension)
+* desc : A brief description of the test
+* label : The test label (typically 'auto')
+* owner : The point(s) of contact for the test
+* independent : A flag indicating whether the test is dependent on another test (typically True)
+* steps: A tuple containing the test steps (minimum length = 1)
+
+
+Test steps are run sequentially, and are created with the `geos` method.
+If a given test step fails, then it will produce an error and any subsequent steps will be canceled.
+This method accepts the following keyword arguments:
+
+* deck : The name of the input xml file.
+* np : The number of parallel processes required to run the step.
+* ngpu : The number of GPU devices required to run the step.  Note: this argument is typically ignored for geos builds/machines that are not configured to use GPU's.  In addition, we typically expect that np=ngpu.
+* x_partitions : The number of partitions to use along the x-dimension
+* y_partitions : The number of partitions to use along the y-dimension
+* z_partitions : The number of partitions to use along the z-dimension
+* name : The header to use for output file names
+* restartcheck_params : (optional) If this value is defined, run a restart check with these parameters (specified as a dictionary).
+* curvecheck_params : (optional) If this value is defined, run a curve check with these parameters (specified as a dictionary).
+* restart_file : (optional) The name of a restart file to resume from.  To use this option, there must be a previous step that produces the selected restart file.
+* baseline_pattern : (optional) The regex for the baseline files to use (required if the name of the step differs from the baseline)
+* allow_rebaseline : A flag that indicates whether this step can be rebaselined.  This is typically only true for the first step in a test case.
+
+
+Note that a given *.ats* file can create any number of tests and link to any number of input xml files.
+For any given test step, we expect that at least one restart or curve check be defined.
+
+
+Creating a New Test Directory
+-------------------------------
+
+To add a new set of tests, create a new folder in the `integratedTests/tests/allTests*` directory.
+This folder needs to include at least one *.ats* file to be included in the integrated tests.
+Using the sedov example, after creating *sedov.ats* the directory should look like
+
+.. code-block:: sh
+
+  - integratedTests/tests/allTests/sedov/
+    - sedov.ats
+    - sedov.xml (this file should be a symbolic link to a GEOS input file located somewhere within */path/to/GEOS/inputFiles*)
+
+At this point you should run the integrated tests (in the build directory run: `make ats_run`).
+Assuming that the new *geos* step for your test case was successful, the subsequent *restartcheck* step will fail because the baselines have not yet been created.
+At this point the directory should look like this:
+
+.. code-block:: sh
+
+  - integratedTests/tests/allTests/sedov/
+    - sedov/
       - <geosx files>...
       - <ats files>...
-    - beamBending.ats
-    - beamBending.xml
+    - sedov.ats
+    - sedov.xml
     - <ats files>...
 
-Now run
 
-.. code-block:: sh
+You can then follow the steps in the next section to record the initial baseline files.
 
-  ./geosxats.sh -a rebaseline
 
-and rebaseline your test. Finally run the test a second time and confirm that it passes. Note that unless you disable the restartcheck step you will need to output a restart file. Although not strictly necessary it is best to put the *xml* file in the main *GEOSX* repo and create an relative symbolic link to it in the test directory.
+.. _rebaselining-tests:
 
 Rebaselining Tests
-=================================
-Occasionally it is necessary to rebaseline one or more tests due to feature changes in the code.  We suggest the following workflow:
+----------------------------
 
-In the GEOSX repository, create a branch with your modifications:
+Occasionally you may need to add or update baseline files in the repository (possibly due to feature changes in the code).
+This process is called rebaselining.
+We suggest the following workflow:
+
+
+Step 1
+^^^^^^^^^
+
+In the GEOS repository, create or checkout a branch with your modifications:
 
 .. code-block:: sh
 
-  cd <GEOSX-path>
+  cd /path/to/GEOS
   git checkout -b user/feature/newFeature
 
-Add your changes, confirm it passes all the continuous integration tests, and get approval for a pull request.
 
-Now, confirm that your integratedTests submodule is up to date:
+Add your changes, confirm that they produce the expected results, and get approval for a pull request.
+If your branch needs to be rebaselined, make sure to indicate this in your pull request with the appropriate Label.
 
-.. code-block:: sh
 
-  git submodule
+Step 2
+^^^^^^^^^
 
-This will list the commit hash for all submodules.  Check that the integrated tests submodule is on develop and that the commit hash is the same one as the latest GEOSX develop branch points to.  If you have somehow fallen behind, go into integratedTests, checkout develop, and pull.
-
-Now go to the integratedTests submodule and check out a branch for your new baselines.  It is a good idea to name branch something similar to your feature branch so it is obvious the two branches are related.
+Go to the integratedTests submodule, checkout and pull develop, and create a branch with the same name as the one in the main GEOS repository:
 
 .. code-block:: sh
 
-  cd <integratedTests-path>
-  git checkout -b user/rebase/newFeature
+  cd /path/to/GEOS/integratedTests
+  git checkout develop
+  git pull
+  git checkout -b user/feature/newFeature
 
-Go back to your GEOSX build directory and run the integrated tests
 
-.. code-block:: sh
+Step 3
+^^^^^^^^^
 
-  cd <build-path>
-  ./geosxats.sh
-
-Confirm that any tests that fail need to be **legitimately** rebaselined.  Arbitrarily changing baselines defeats the purpose of the integrated tests.  In your PR discussion, please identify which tests will change and any unusual behavior.
-
-We can now actually rebaseline the tests
+Go back to your GEOS build directory and run the integrated tests:
 
 .. code-block:: sh
 
-  ./geosxats -a rebaseline
+  # Note: on shared machines, run these commands in an allocation
+  cd /path/to/GEOS/build-dir/
+  make ats_run
 
-You’ll be prompted to confirm whether rebaselining is required for every integrated test, one at a time, via a ``[y/n]`` prompt. Make sure to only answer ``y`` to the tests that you actually want to rebaseline, otherwise correct baselines for already passing tests will still be updated and bloat your pull request and repository size.
 
-Confirm that the rebaselines are working as expected, by cleaning the test dir and re-running the checks:
+Inspect the test results that fail and determine which need to be **legitimately** rebaselined.
+Arbitrarily changing baselines defeats the purpose of the integrated tests.
+In your PR discussion, please identify which tests will change and any unusual behavior.
+
+
+Step 4
+^^^^^^^^^
+
+We can then rebaseline the tests.
+In most cases, you will want to rebaseline all of the tests marked as **FAILED**.
+To do this you can run this command in the build directory:
 
 .. code-block:: sh
 
-  ./geosxats -a veryclean
-  ./geosxats
+  make ats_rebaseline_failed
 
 
-At this point you should pass all the integratedTests.  Clean the branch and commit your changes to the baseline branch.
+Otherwise, you can run the following command, and select whether tests should be rebaselined one at a time via a ``[y/n]`` prompt.
 
 .. code-block:: sh
 
-  ./geosxats -a veryclean
-  cd <integratedTests-path>
+  make ats_rebaseline_failed
+
+
+Make sure to only answer ``y`` to the tests that you actually want to rebaseline, otherwise correct baselines for already passing tests will still be updated and bloat your pull request and repository size.
+
+
+Step 5
+^^^^^^^^^
+
+Confirm that the new baselines are working as expected.
+You can do this by cleaning the test directories and re-running the tests:
+
+.. code-block:: sh
+
+  # Note: on shared machines, run these commands in an allocation
+  cd /path/to/GEOS/build-dir/
+  make ats_clean
+  make ats_run
+
+
+At this point you should pass all the integratedTests.
+
+
+Step 6
+^^^^^^^^^
+
+Clean out unnecessary files and add new ones to the branch:
+
+.. code-block:: sh
+
+  cd /path/to/GEOS/build-dir/
+  make ats_clean
+  
+  # Check for new or modified files
+  cd /path/to/GEOS/integratedTests
   git status
-  git add *
+
+  # Add new or modified files
+  git add file_a file_b ...
   git commit -m "Updating baselines"
-  git push
+  git push origin user/feature/newFeature
 
-If you haven't already set up your local branch to point to a remote branch, you will be prompted to do so when attempting to push.  You will then want to create a pull request in the integratedTests repository. Once you have merge approval for your PR, you can merge your rebaseline branch into ``integratedTests/develop``.
 
-At this point, you need to get your GEOSX ``user/feature/newFeature`` branch pointing to the head commit on ``integratedTests/develop``.  We will check out the latest version of the test repo and add it to our feature branch:
+Step 6
+^^^^^^^^^
+
+If you haven't already done so, create a merge request for your integratedTests branch.
+Once you have received approval for your PR and are ready to continue, you can click merge the branch by clicking the button on github.
+
+You should then checkout the develop branch of integratedTests and pull the new changes.
 
 .. code-block:: sh
 
-  cd <integratedTests-path>
+  cd /path/to/GEOS/integratedTests
   git checkout develop
   git pull
 
-  cd <GEOSX-path>
-  git add integratedTests
-  git commit -m "Updating integratedTests hash"
-  git push
 
-You may also want to run ``git submodule`` to confirm the submodule hash is what we expect, the last commit in ``integratedTests/develop``. Once your feature branch passes all Continuous Integration tests, it can be successfully merged into ``GEOSX/develop``.
+You then need to update the integratedTests 'hash' in your associated GEOS branch.
+
+.. code-block:: sh
+
+  cd /path/to/GEOS/
+  git add integratedTests
+  git commit -m "Updating the integratedTests hash"
+  git push origin user/feature/newFeature
+
+
+At this point, you will need to wait for the CI/CD tests to run on github.
+After they succeed, you can merge your branch into develop using the button on github. 
+
+
 
 Tips
-----
-**Parallel Tests**: On some development machines geosxats won't run parallel tests by default (e.g. on an linux laptop or workstation), and as a result many baselines will be skipped.  We highly recommend running tests and rebaselining on an MPI-aware platform.
+=======
 
-**Filtering Checks**: A common reason for rebaselining is that you have changed the name of an XML node in the input files.  While the baselines may be numerically identical, the restarts will fail because they contain different node names.  In this situation, it can be useful to add a filter to the restart check script.  If you open ``integratedTests/geosxats/helpers/restartcheck.py``, at line 12 you will find a line:
 
-.. code-block:: python
+**Parallel Tests**: On some development machines geosxats won't run parallel tests by default (e.g. on an linux laptop or workstation), and as a result many baselines will be skipped.
+We highly recommend running tests and rebaselining on an MPI-aware platform.
 
-  EXCLUDE_DEFAULT = [".*/commandLine", ".*/schema$", ".*/globalToLocalMap"]
-
-This variable contains paths to be excluded from the restart checks.  For example, we recently renamed the XML block ``<SystemSolverParameters/>`` to ``<LinearSolverParameters/>``.  In doing so, we had to rebaseline every test even though we expected no numerical differences.  Temporarily adding the following filter helped us rapidly check this was indeed the case:
-
-.. code-block:: python
-
-  EXCLUDE_DEFAULT = [".*/SystemSolverParameters", ".*/LinearSolverParameters", ".*/commandLine", ".*/schema$", ".*/globalToLocalMap"]
-
-You may find this approach useful for quickly filtering tests to distinguish between expected and unexpected failures.
+**Filtering Checks**: A common reason for rebaselining is that you have changed the name of an XML node in the input files.
+While the baselines may be numerically identical, the restarts will fail because they contain different node names.
+In this situation, it can be useful to add a filter to the restart check script using the *geos_ats.sh* script (see the `-e` and `-m` options in :ref:`Override Test Behavior` )

@@ -4,7 +4,7 @@ from .test_case import TestCase
 
 from dataclasses import dataclass
 
-from typing import Tuple, Optional
+from typing import Tuple
 
 
 @dataclass    
@@ -37,7 +37,7 @@ class CurveCheckParameters:
 class TestDeck:
     name: str
     description: str
-    partitions: tuple[tuple[int, int, int], tuple[int, int, int]]
+    partitions: list[tuple[int, int, int]]
     restart_step: int
     check_step: int
     restartcheck_params: RestartcheckParameters = None

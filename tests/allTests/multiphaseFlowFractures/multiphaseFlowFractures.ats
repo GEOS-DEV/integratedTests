@@ -1,3 +1,8 @@
+import os
+import geos_ats 
+from geos_ats.test_builder import TestDeck, RestartcheckParameters, generate_geos_tests
+
+
 restartcheck_params = {}
 restartcheck_params["atol"] = 1.0E-10
 restartcheck_params["rtol"] = 4.0E-9
@@ -7,8 +12,5 @@ decks = (("deadOil_fractureMatrixFlow_edfm_horizontalFrac", "Multiphase flow EDF
           ((1, 1, 1), (2, 1, 1), (4, 1, 1)), 0, 23),
          ("deadOil_fractureMatrixFlow_edfm_inclinedFrac", "Multiphase flow EDFM inclined frac.", ((1, 1, 1), (2, 2, 1)),
           0, 29))
-
-import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_from_values
 
 generate_geos_tests_from_values( decks, restartcheck_params )

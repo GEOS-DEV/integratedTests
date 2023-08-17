@@ -60,23 +60,16 @@ def _build_poro_elastic_coupling_case(deck, cycles, partitions, description, res
         A callable taking the partition tuple in argument and returning the test name.
     """
     
-    restartcheck_params_instance = RestartcheckParameters(**restartcheck_params)
-
     # The simulation will generate data for two cycles 
     intermediate_cycle, last_cycle = cycles
 
-    dictionary = {
-    "name": deck.split(".")[0],
-    "description": description.description_builder,
-    "partitions": partitions,
-    "restart_step": intermediate_cycle,
-    "check_step": last_cycle
-    }
-
-    deck_instance = TestDeck.from_dict( dictionary )
-    deck_instance.restartcheck_params = restartcheck_params_instance
-
-    return deck_instance
+    return TestDeck(
+        name=deck.split(".")[0],
+        description=description.description_builder,
+        partitions=partitions,
+        restart_step=intermediate_cycle,
+        check_step=last_cycle,
+        restartcheck_params=RestartcheckParameters(**restartcheck_params ) )
 
 def _build_Terzaghi_cases():
     description = Description("Terzaghi's 1D Consolidation", "auto", "Nicola Castelletto", True)

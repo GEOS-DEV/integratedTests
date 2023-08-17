@@ -1,3 +1,7 @@
+import os
+import geos_ats 
+from geos_ats.test_builder import TestDeck, RestartcheckParameters, generate_geos_tests
+
 restartcheck_params = {}
 restartcheck_params["atol"] = 1.0E-8
 restartcheck_params["rtol"] = 2.0E-10
@@ -20,8 +24,5 @@ decks = (
      ((1, 1, 1), (2, 2, 2)), 1, 2),
     ("hybridHexPrism_LaplaceVEM_smoke",
      "Testing the Laplace solver with the Virtual Element Method (hexahedra and prisms)", ((1, 1, 1), (3, 1, 1)), 1, 2))
-
-import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_from_values
 
 generate_geos_tests_from_values( decks, restartcheck_params )

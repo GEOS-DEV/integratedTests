@@ -1,3 +1,7 @@
+import os
+import geos_ats 
+from geos_ats.test_builder import TestDeck, RestartcheckParameters, generate_geos_tests
+
 restartcheck_params = {}
 restartcheck_params["atol"] = 1.0E-6
 restartcheck_params["rtol"] = 1.0E-6
@@ -36,8 +40,5 @@ decks = (
         ((1, 1, 1), (2, 2, 1)),    # not enough z layers for 27 ranks
         65,
         130))
-
-import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_from_values
 
 generate_geos_tests_from_values( decks, restartcheck_params )

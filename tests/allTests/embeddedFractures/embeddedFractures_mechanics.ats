@@ -1,11 +1,13 @@
+import os
+import geos_ats 
+from geos_ats.test_builder import TestDeck, RestartcheckParameters, generate_geos_tests
+
+
 # format: (<input>, <desc>, <partition_list>, <restart_step>, <total_steps>, <restartcheck_params>)
 decks = (("Sneddon_smoke", "Sneddon with horizontal fracture", ((1, 1, 1), (2, 2, 1)), 0, 1 ), 
          ("Sneddon_staticCondensation_smoke", "Sneddon with horizontal fracture usic static condensation",((1, 1, 1), (2, 2, 1)), 0, 1),
          ("SneddonRotated_smoke", "Sneddon with inclined fracture", ((1, 1, 1), (2, 2, 1)), 0, 1,))
 
 restartcheck_params =  { "atol": 1.0E-8, "rtol": 4.0E-7 }
-
-import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_from_values
 
 generate_geos_tests_from_values( decks, restartcheck_params )

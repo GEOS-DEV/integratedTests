@@ -1,3 +1,6 @@
+import os
+import geos_ats
+from geos_ats.test_builder import TestDeck, RestartcheckParameters, generate_geos_tests
 restartcheck_params = {}
 restartcheck_params["atol"] = 1.0E-6
 restartcheck_params["rtol"] = 1.0E-5
@@ -9,7 +12,5 @@ decks = (("fractureMatrixThermalFlow_edfm",
           "Thermal single-phase flow with a conforming fracture", 
           ((1, 1, 1), (2, 2, 1)), 0, 10))
 
-import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_from_values
 
 generate_geos_tests_from_values( decks, restartcheck_params )

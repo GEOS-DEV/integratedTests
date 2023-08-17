@@ -1,3 +1,6 @@
+import os
+import geos_ats
+from geos_ats.test_builder import TestDeck, RestartcheckParameters, generate_geos_tests
 restartcheck_params = {}
 restartcheck_params["atol"] = 1.0E-6
 restartcheck_params["rtol"] = 1.0E-5
@@ -7,7 +10,5 @@ decks = (("thermalCompressible_2d_smoke", "Pure thermal convection problem (2D, 
          ("3D_10x10x10_thermalCompressible_smoke",
           "Thermal single phase flow test (3D, compressible, Dirichlet BC, thermal)", ((1, 1, 1), (2, 2, 2)), 6, 20))
 
-import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_from_values
 
 generate_geos_tests_from_values( decks, restartcheck_params )

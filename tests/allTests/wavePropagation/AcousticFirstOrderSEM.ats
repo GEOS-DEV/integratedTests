@@ -1,3 +1,6 @@
+import os
+import geos_ats
+from geos_ats.test_builder import TestDeck, RestartcheckParameters, generate_geos_tests
 restartcheck_params = {}
 restartcheck_params["atol"] = 1.0E-4
 restartcheck_params["rtol"] = 2.0E-5
@@ -16,7 +19,5 @@ decks = ((
     "Acoustic wave solver, third-order FE, first order formulation, absorbing BC on the sides, free surface BC at the top",
     ((1, 1, 1), (2, 2, 2)), 100, 200))
 
-import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_from_values
 
 generate_geos_tests_from_values( decks, restartcheck_params )

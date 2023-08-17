@@ -1,3 +1,6 @@
+import os
+import geos_ats
+from geos_ats.test_builder import TestDeck, RestartcheckParameters, generate_geos_tests
 # format: (<input>, <desc>, <partition_list>, <restart_step>, <total_steps>, <restartcheck_params>)
 decks = (("CasedThermoElasticWellbore_smoke", "Near wellbore thermo elastic case simulated as a single-phase poromechanics case", ((1, 1, 1), (2, 2, 1)), 5, 10),
           ("ThermoPoroElastic_consolidation_fim", "1D thermo poro elastic case consolidation problem (FIM)", ((1, 1, 1), (1, 2, 1)), 633, 683 ), 
@@ -7,7 +10,5 @@ decks = (("CasedThermoElasticWellbore_smoke", "Near wellbore thermo elastic case
 
 restartcheck_params = {"atol": 1.0E-6, "rtol": 4.0E-6}
 
-import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_from_values
 
 generate_geos_tests_from_values( decks, restartcheck_params )

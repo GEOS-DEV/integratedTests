@@ -35,30 +35,28 @@ class TestDeck:
     curvecheck_params: CurveCheckParameters = None
     
     @classmethod
-    def from_values(cls, values):
+    def from_dict(cls, data_dict):
         return cls(
-            name=values[0],
-            description=values[1],
-            partitions=values[2],
-            restart_step=values[3],
-            check_step=values[4]
+            name=data_dict["name"],
+            description=data_dict["description"],
+            partitions=data_dict["partitions"],
+            restart_step=data_dict["restart_step"],
+            check_step=data_dict["check_step"]
         )
 
 def generate_geos_tests( decks: Iterable[TestDeck] ):
-    
+    """
+    """
     for deck in decks:
-        if not isinstance(deck, TestDeck):
-            raise ValueError("Input tuple must contain instances of the TestDeck class.")
-        
+
+        restartcheck_params=None
+        curvecheck_params=None
+
         if deck.restartcheck_params is not None:
-            restartcheck_params_dict = deck.restartcheck_params.as_dict()
-        else:
-            restartcheck_params_dict=None
+            restartcheck_params= deck.restartcheck_params.as_dict()
 
         if deck.curvecheck_params is not None:
-            curvecheck_params_dict = deck.curvecheck_params.as_dict()
-        else:
-            curvecheck_params_dict=None
+            curvecheck_params = deck.curvecheck_params.as_dict()
 
         for partition in deck.partitions:
             nx, ny, nz = partition
@@ -74,8 +72,8 @@ def generate_geos_tests( decks: Iterable[TestDeck] ):
                         x_partitions=nx,
                         y_partitions=ny,
                         z_partitions=nz,
-                        restartcheck_params=restartcheck_params_dict,
-                        curvecheck_params=curvecheck_params_dict) ]
+                        restartcheck_params=restartcheck_params,
+                        curvecheck_params=curvecheck_params) ]
 
             if deck.restart_step > 0:
                 steps.append(geos(deck=deck.name + ".xml",
@@ -88,8 +86,8 @@ def generate_geos_tests( decks: Iterable[TestDeck] ):
                             restart_file=os.path.join(testcase_name, "{}_restart_{:09d}".format(base_name, deck.restart_step) ),
                             baseline_pattern=f"{base_name}_restart_[0-9]+\.root",
                             allow_rebaseline=False,
-                            restartcheck_params=restartcheck_params_dict,
-                            curvecheck_params=curvecheck_params_dict ) )
+                            restartcheck_params=restartcheck_params,
+                            curvecheck_params=curvecheck_params ) )
 
             TestCase(name=testcase_name,
                      desc=deck.description,
@@ -97,17 +95,6 @@ def generate_geos_tests( decks: Iterable[TestDeck] ):
                      owner="GEOS team",
                      independent=True,
                      steps=steps)
-    
-
-def generate_geos_tests_from_values( decks, restartcheck_params ):
-    """ 
-    """
-    restartcheck_params_instance = RestartcheckParameters(**restartcheck_params)
-    deck_instances = [TestDeck.from_values(deck_data) for deck_data in decks]
-    for deck_instance in deck_instances:
-        deck_instance.restartcheck_params = restartcheck_params_instance
-
-    generate_geos_tests( deck_instances )
    
             
 def generate_geos_tests_from_dictionary( decks, restartcheck_params, curvecheck_params_base=None ):
@@ -119,7 +106,7 @@ def generate_geos_tests_from_dictionary( decks, restartcheck_params, curvecheck_
         
     for deck in decks:
             
-        deck_instance = TestDeck( **deck )
+        deck_instance = TestDeck.from_dict( deck )
         deck_instance.restartcheck_params = restartcheck_params_instance
 
         if curvecheck_params_base is not None:

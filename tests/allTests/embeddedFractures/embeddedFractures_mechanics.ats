@@ -9,16 +9,19 @@ decks = [TestDeck(name='Sneddon_smoke',
                   description='Sneddon with horizontal fracture', 
                   partitions=((1, 1, 1), (2, 2, 1)), 
                   restart_step=0, 
-                  check_step=1), 
+                  check_step=1,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
          TestDeck(name='Sneddon_staticCondensation_smoke', 
                   description='Sneddon with horizontal fracture usic static condensation', 
                   partitions=((1, 1, 1), (2, 2, 1)), 
                   restart_step=0, 
-                  check_step=1), 
+                  check_step=1,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
          TestDeck(name='SneddonRotated_smoke', 
                   description='Sneddon with inclined fracture', 
                   partitions=((1, 1, 1), (2, 2, 1)),
                   restart_step=0, 
-                  check_step=1)]
+                  check_step=1,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params))]
 
-generate_geos_tests(decks, restartcheck_params)
+generate_geos_tests(decks)

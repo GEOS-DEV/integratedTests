@@ -48,4 +48,4 @@ decks = [TestDeck(name='KirschProblem',
                   check_step=1,
                   restartcheck_params=RestartcheckParameters(**restartcheck_params))]
                   
-generate_geos_testss(decks)
+generate_geos_tests(decks)

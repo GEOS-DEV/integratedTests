@@ -10,11 +10,13 @@ decks = [TestDeck(name='deadOil_fractureMatrixFlow_edfm_horizontalFrac',
                   description='Multiphase flow EDFM horizontal frac.', 
                   partitions=((1, 1, 1), (2, 1, 1), (4, 1, 1)), 
                   restart_step=0, 
-                  check_step=23), 
+                  check_step=23,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
         TestDeck(name='deadOil_fractureMatrixFlow_edfm_inclinedFrac',
                 description='Multiphase flow EDFM inclined frac.', 
                 partitions=((1, 1, 1), (2, 2, 1)), 
                 restart_step=0, 
-                check_step=29)]
+                check_step=29,
+                restartcheck_params=RestartcheckParameters(**restartcheck_params))]
 
-generate_geos_tests(decks, restartcheck_params)
+generate_geos_tests(decks)

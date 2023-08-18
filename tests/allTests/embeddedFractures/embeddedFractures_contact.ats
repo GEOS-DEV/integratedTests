@@ -1,13 +1,17 @@
+
 import os
-import geos_ats 
+import geos_ats
 from geos_ats.test_builder import TestDeck, RestartcheckParameters, generate_geos_tests
+decks = [TestDeck(name='EmbFrac_Compression_Frictionless',
+                   description='Single efem fracture under compression - frictionless', 
+                   partitions=((1, 1, 1), (2, 2, 1)), 
+                   restart_step=0, 
+                   check_step=1),
+        TestDeck(name='EmbFrac_Compression_CoulombFriction',
+                 description='Single efem fracture under compression - Coulomb friction', 
+                 partitions=((1, 1, 1), (2, 2, 1)), 
+                 restart_step=0, 
+                 check_step=1)]
 
-# format: (<input>, <desc>, <partition_list>, <restart_step>, <total_steps>, <restartcheck_params>)
-
-decks = (("EmbFrac_Compression_Frictionless", "Single efem fracture under compression - frictionless", ((1, 1, 1), (2, 2, 1)), 0, 1 ), 
-         ("EmbFrac_Compression_CoulombFriction", "Single efem fracture under compression - Coulomb friction", ((1, 1, 1), (2, 2, 1)), 0, 1 )
-        )
-
-restartcheck_params = {"atol": 1.0E-6,"rtol": 4.0E-7}
-
-generate_geos_tests_from_values( decks, restartcheck_params )
+restartcheck_params = {'atol': 1e-06, 'rtol': 4e-07}
+generate_geos_tests(decks, restartcheck_params)

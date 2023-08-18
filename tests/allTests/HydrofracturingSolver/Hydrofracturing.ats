@@ -1,3 +1,5 @@
+import geos_ats 
+from geos_ats.test_builder import generate_geos_tests_from_dictionary
 
 # Check parameters
 restartcheck_params = {}
@@ -174,8 +176,5 @@ decks = (kgd_viscosity_dominated,
          sneddon,
          walsh_quarter_no_chombo
          )
-
-import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_from_dictionary
 
 generate_geos_tests_from_dictionary( decks, restartcheck_params, curvecheck_params_base )

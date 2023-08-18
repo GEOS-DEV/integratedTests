@@ -1,24 +1,117 @@
+
 import os
-import geos_ats 
+import geos_ats
 from geos_ats.test_builder import TestDeck, RestartcheckParameters, generate_geos_tests
 
+restartcheck_params = {'atol': 1e-06, 'rtol': 4e-06}
 
-# format: (<input>, <desc>, <partition_list>, <restart_step>, <total_steps> )
-decks = (("SlipPermeability_pEDFM_smoke", "pEDFM slip dependent permeability case", ((1, 1, 1), (2, 2, 1)), 0, 1 ), 
-         ("WillisRichardsPermeability_EDFM", "WillisRichards Permeability model with EDFM", ((1, 1, 1), (2, 2, 1)), 0, 5 ), 
-         ("PoroElastic_conformingFracture_2d_openingFrac_horizontal", "PoroElastic conformingFracture 2d case", ((1, 1, 1), (2, 2, 1)), 0, 10 ),
-         ("PoroElastic_conformingFracture_2d_openingFrac_vertical", "PoroElastic conformingFracture 2d case", ((1, 1, 1), (2, 2, 1)), 0, 10 ), 
-         ("PoroElastic_efem-edfm_pressurizedFrac_smoke", "poromechanics efem-edfm pressurized vertical frac", ((1, 1, 1), (2, 2, 1)), 0, 1 ),
-         ("PoroElastic_efem-edfm_verticalFrac_smoke", "poromechanics efem-edfm vertical frac",((1, 1, 1), (2, 2, 1)), 0, 1 ),
-         ("PoroElastic_efem-edfm_inclinedFrac_smoke", "poromechanics efem-edfm inclined frac",((1, 1, 1), (2, 2, 1)), 0, 1 ),
-         ("ExponentialDecayPermeability_edfm", "Exponential Decay Permeability model with EDFM",((1, 1, 1), (2, 2, 1)), 0, 5 )
-        )
+decks = [TestDeck(name='SlipPermeability_pEDFM_smoke',
+                   description='pEDFM slip dependent permeability case',
+                   partitions=((1, 1, 1), (2, 2, 1)),
+                   restart_step=0,
+                   check_step=1,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)),
+        TestDeck(name='WillisRichardsPermeability_EDFM', 
+                 description='WillisRichards Permeability model with EDFM', 
+                 partitions=((1, 1, 1), (2, 2, 1)), 
+                 restart_step=0, 
+                 check_step=5,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+        TestDeck(name='PoroElastic_conformingFracture_2d_openingFrac_horizontal', 
+                 description='PoroElastic conformingFracture 2d case', 
+                 partitions=((1, 1, 1), (2, 2, 1)), 
+                 restart_step=0, 
+                 check_step=10,
+                 restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+        TestDeck(name='PoroElastic_conformingFracture_2d_openingFrac_vertical', 
+                 description='PoroElastic conformingFracture 2d case', 
+                 partitions=((1, 1, 1), (2, 2, 1)), 
+                 restart_step=0, 
+                 check_step=10,
+                 restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+        TestDeck(name='PoroElastic_efem-edfm_pressurizedFrac_smoke', 
+                 description='poromechanics efem-edfm pressurized vertical frac', 
+                 partitions=((1, 1, 1), (2, 2, 1)), 
+                 restart_step=0, 
+                 check_step=1,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+        TestDeck(name='PoroElastic_efem-edfm_verticalFrac_smoke', 
+                 description='poromechanics efem-edfm vertical frac',
+                 partitions=((1, 1, 1), (2, 2, 1)), 
+                 restart_step=0, 
+                 check_step=1,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+        TestDeck(name='PoroElastic_efem-edfm_inclinedFrac_smoke', 
+                 description='poromechanics efem-edfm inclined frac', 
+                 partitions=((1, 1, 1), (2, 2, 1)), 
+                 restart_step=0, 
+                 check_step=1,
+                 restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+        TestDeck(name='ExponentialDecayPermeability_edfm', 
+                 description='Exponential Decay Permeability model with EDFM', 
+                 partitions=((1, 1, 1), (2, 2, 1)), 
+                 restart_step=0, 
+                 check_step=5,
+                 restartcheck_params=RestartcheckParameters(**restartcheck_params))]
 
-restartcheck_params = {"atol": 1.0E-6, "rtol": 4.0E-6}
 
-generate_geos_tests_from_values( decks, restartcheck_params )
+generate_geos_tests(decks)
 
-decks = (  ("ExponentialDecayPermeability_conformingFracture", "Exponential Decay Permeability model with conforming fracture", ((1, 1, 1), (2, 2, 1)), 0, 12 ), )
+restartcheck_params = {'atol': 1e-05, 'rtol': 0.0004}
 
-restartcheck_params = {"atol": 1.0E-5, "rtol": 4.0E-4}
-generate_geos_tests_from_values( decks, restartcheck_params )
+decks = [TestDeck(name='SlipPermeability_pEDFM_smoke', 
+                  description='pEDFM slip dependent permeability case', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=0, 
+                  check_step=1,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+         TestDeck(name='WillisRichardsPermeability_EDFM', 
+                  description='WillisRichards Permeability model with EDFM', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=0, 
+                  check_step=5,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+         TestDeck(name='PoroElastic_conformingFracture_2d_openingFrac_horizontal', 
+                  description='PoroElastic conformingFracture 2d case', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=0, 
+                  check_step=10,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+         TestDeck(name='PoroElastic_conformingFracture_2d_openingFrac_vertical', 
+                  description='PoroElastic conformingFracture 2d case', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=0, 
+                  check_step=10,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+         TestDeck(name='PoroElastic_efem-edfm_pressurizedFrac_smoke', 
+                  description='poromechanics efem-edfm pressurized vertical frac', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=0, 
+                  check_step=1,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+         TestDeck(name='PoroElastic_efem-edfm_verticalFrac_smoke', 
+                  description='poromechanics efem-edfm vertical frac', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=0, 
+                  check_step=1,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+         TestDeck(name='PoroElastic_efem-edfm_inclinedFrac_smoke',
+                  description='poromechanics efem-edfm inclined frac', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=0, 
+                  check_step=1,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+         TestDeck(name='ExponentialDecayPermeability_edfm', 
+                  description='Exponential Decay Permeability model with EDFM', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=0, 
+                  check_step=5,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)),
+         TestDeck(name='ExponentialDecayPermeability_conformingFracture', 
+                  description='Exponential Decay Permeability model with conforming fracture', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=0, 
+                  check_step=12,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params))]
+
+generate_geos_tests(decks)

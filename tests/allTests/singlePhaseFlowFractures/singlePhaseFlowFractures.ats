@@ -1,31 +1,60 @@
+
 import os
 import geos_ats
 from geos_ats.test_builder import TestDeck, RestartcheckParameters, generate_geos_tests
 restartcheck_params = {}
-restartcheck_params["atol"] = 1.0E-10
-restartcheck_params["rtol"] = 4.0E-9
+restartcheck_params['atol'] = 1e-10
+restartcheck_params['rtol'] = 4e-09
 
-# format: (<input>, <desc>, <partition_list>, <restart_step>, <total_steps>)
-decks = (("fractureFlow_conforming_2d_vtk_input",
-          "Single phase flow test (2D, compressible, T-shaped fracture flow defined in vtk input file)", ((1, 1, 1), ),
-          25, 50), ("fractureFlow_conforming_2d",
-                    "Single phase flow test (2D, compressible, fracture flow, conforming)", ((1, 1, 1), (2, 1, 1),
-                                                                                             (4, 1, 1)), 5, 10),
-         ("fractureJunctionFlow_conforming_2d",
-          "Single phase flow test (2D, compressible, intersecting fracture flow, conforming)", ((1, 1, 1), ), 25,
-          50), ("fractureMatrixFlow_conforming_2d", "Single phase flow test (2D, compressible, fracture/matrix flow)",
-                ((1, 1, 1), (2, 2, 1), (3, 3, 1)), 25, 50),
-         ("fractureMatrixFlow_edfm_horizontalFrac",
-          "Single phase flow test (3D, incompressible, fracture/matrix flow, EDFM)", ((1, 1, 1), (2, 2, 1)), 1,
-          1), ("fractureMatrixFlow_edfm_inclinedFrac",
-               "Single phase flow test (3D, incompressible, fracture/matrix flow, EDFM)", ((1, 1, 1), (2, 2, 1)), 1, 1),
-         ("fractureMatrixFlow_edfm_impermeableFracture", "SinglePhase flow with pedfm", ((1, 1, 1), (2, 2, 1)), 0,
-          1), ("fractureMatrixFlowWithGravity_edfm_verticalFrac", "SinglePhase flow with edfm frac with gravity",
-               ((1, 1, 1), (1, 2, 1)), 0,
-               1), ("fractureMatrixFlowWithGravity_conforming_2d", "SinglePhase flow with conforming frac with gravity",
-                    ((1, 1, 1), (2, 2, 1)), 0, 1), ("fractureFlowWithGravity_conforming_2d",
-                                                    "SinglePhase flow in conforming frac with gravity",
-                                                    ((1, 1, 1), (1, 2, 1)), 0, 1))
+decks = [TestDeck(name='fractureFlow_conforming_2d_vtk_input', 
+                  description='Single phase flow test (2D, compressible, T-shaped fracture flow defined in vtk input file)', 
+                  partitions=((1, 1, 1),), 
+                  restart_step=25, 
+                  check_step=50),
+         TestDeck(name='fractureFlow_conforming_2d', 
+                  description='Single phase flow test (2D, compressible, fracture flow, conforming)', 
+                  partitions=((1, 1, 1), (2, 1, 1), (4, 1, 1)), 
+                  restart_step=5, 
+                  check_step=10),
+         TestDeck(name='fractureJunctionFlow_conforming_2d', 
+                  description='Single phase flow test (2D, compressible, intersecting fracture flow, conforming)', 
+                  partitions=((1, 1, 1),), 
+                  restart_step=25, 
+                  check_step=50),
+         TestDeck(name='fractureMatrixFlow_conforming_2d', 
+                  description='Single phase flow test (2D, compressible, fracture/matrix flow)', 
+                  partitions=((1, 1, 1), (2, 2, 1), (3, 3, 1)), 
+                  restart_step=25, 
+                  check_step=50), 
+         TestDeck(name='fractureMatrixFlow_edfm_horizontalFrac', 
+                  description='Single phase flow test (3D, incompressible, fracture/matrix flow, EDFM)', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=1, 
+                  check_step=1), 
+         TestDeck(name='fractureMatrixFlow_edfm_inclinedFrac', 
+                  description='Single phase flow test (3D, incompressible, fracture/matrix flow, EDFM)', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=1, 
+                  check_step=1), 
+         TestDeck(name='fractureMatrixFlow_edfm_impermeableFracture', 
+                  description='SinglePhase flow with pedfm', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=0, 
+                  check_step=1), 
+         TestDeck(name='fractureMatrixFlowWithGravity_edfm_verticalFrac', 
+                  description='SinglePhase flow with edfm frac with gravity', 
+                  partitions=((1, 1, 1), (1, 2, 1)), 
+                  restart_step=0, 
+                  check_step=1), 
+         TestDeck(name='fractureMatrixFlowWithGravity_conforming_2d', 
+                  description='SinglePhase flow with conforming frac with gravity', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=0, 
+                  check_step=1), 
+         TestDeck(name='fractureFlowWithGravity_conforming_2d', 
+                  description='SinglePhase flow in conforming frac with gravity', 
+                  partitions=((1, 1, 1), (1, 2, 1)), 
+                  restart_step=0, 
+                  check_step=1)]
 
-
-generate_geos_tests_from_values( decks, restartcheck_params )
+generate_geos_tests(decks)

@@ -1,15 +1,21 @@
+
 import os
 import geos_ats
 from geos_ats.test_builder import TestDeck, RestartcheckParameters, generate_geos_tests
-# format: (<input>, <desc>, <partition_list>, <restart_step>, <total_steps>, <restartcheck_params>)
-decks = (("ThermoPoroElastic_efem-edfm_verticalFrac",
-          "Thermoporoelastic case with an embeded fracture", 
-          ((1, 1, 1), (2, 2, 1)), 10, 10 ),
-         ("ThermoPoroElastic_conforming",
-          "Thermoporoelastic case with a conforming fracture",
-          ((1, 1, 1), (2, 2, 1)), 10, 10 ))
 
-restartcheck_params = {"atol": 1.0E-6, "rtol": 4.0E-6}
+restartcheck_params = {'atol': 1e-06, 'rtol': 4e-06}
 
+decks = [TestDeck(name='ThermoPoroElastic_efem-edfm_verticalFrac', 
+                  description='Thermoporoelastic case with an embeded fracture', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=10, 
+                  check_step=10,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+         TestDeck(name='ThermoPoroElastic_conforming', 
+                  description='Thermoporoelastic case with a conforming fracture', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=10, 
+                  check_step=10,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params))]
 
-generate_geos_tests_from_values( decks, restartcheck_params )
+generate_geos_tests(decks)

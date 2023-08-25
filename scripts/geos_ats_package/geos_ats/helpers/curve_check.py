@@ -16,6 +16,8 @@ unit_map = {'milliseconds': 1e-3,
             'days': 60.0 * 60.0 * 24.0,
             'years': 60.0 * 60.0 * 24.0 * 365.25}
 
+DEFAULT_SET_NAME = 'empty_setName'
+
 
 def interpolate_values_time(ta, xa, tb):
     """
@@ -113,8 +115,13 @@ def curve_check_figure(parameter_name, location_str, set_name, data, data_sizes,
              'baseline': {'marker': '.', 'linestyle': ''},
              'script': {'marker': '', 'linestyle': ':'}}
     time_key = f'{parameter_name} Time'
-    value_key = f'{parameter_name} {set_name}'
-    location_key = f'{parameter_name} {location_str} {set_name}'
+    if set_name==DEFAULT_SET_NAME:
+        value_key = f'{parameter_name}'
+        location_key = f'{parameter_name} {location_str}'
+    else:
+        value_key = f'{parameter_name} {set_name}'
+        location_key = f'{parameter_name} {location_str} {set_name}'
+
     s = data_sizes[parameter_name][set_name]
     N = list(s[list(s.keys())[0]])
     nrow = int(np.ceil(float(N[2]) / ncol))
@@ -167,7 +174,6 @@ def curve_check_figure(parameter_name, location_str, set_name, data, data_sizes,
     plt.tight_layout()
     fig.savefig(os.path.join(output_root, f'{parameter_name}_{set_name}'), dpi=200)
 
-
 def compare_time_history_curves(fname, baseline, curve, tolerance, output, output_n_column, units_time, script_instructions):
     """
     Compute time history curves
@@ -205,13 +211,18 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
         else:
             errors.append(f'{k} file not found: {f}')
             continue
-
+        
         for (p, s), t in zip(curve, tolerance):
+            if s==DEFAULT_SET_NAME:
+                key=f'{p}'
+            else:
+                key=f'{p} {s}'    
+
             if f'{p} Time' not in data[k].keys():
                 errors.append(f'Value not found in {k} file: {p}')
                 continue
 
-            if f'{p} {s}' not in data[k].keys():
+            if key not in data[k].keys():
                 errors.append(f'Set not found in {k} file: {s}')
                 continue
 
@@ -230,17 +241,19 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
             if p not in data_sizes:
                 data_sizes[p] = {}
                 tol[p] = {}
+
             if s not in data_sizes[p]:
                 data_sizes[p][s] = {}
                 tol[p][s] = float(t[0])
-            data_sizes[p][s][k] = list(np.shape(data[k][f'{p} {s}']))
-
+            
+            data_sizes[p][s][k] = list(np.shape(data[k][key])) 
+ 
             # Record requested tolerance
             if p not in tol:
                 tol[p] = {}
             if s not in tol[p]:
                 tol[p][s] = t
-
+    
     # Generate script-based curve
     if script_instructions and (len(data) > 0):
         data['script'] = {}
@@ -248,29 +261,41 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
             for script, fn, p, s in script_instructions:
                 k = location_strings[p]
                 data['script'][f'{p} Time'] = data['target'][f'{p} Time']
-                data['script'][f'{p} {k} {s}'] = data['target'][f'{p} {k} {s}']
-                data['script'][f'{p} {s}'] = evaluate_external_script(script, fn, data['target'])
-                data_sizes[p][s]['script'] = list(np.shape(data['script'][f'{p} {s}']))
+                key  = f'{p} {k}'
+                key2 = f'{p}'
+                if s != DEFAULT_SET_NAME:
+                    key  += f' {s}'
+                    key2 += f' {s}'
+                data['script'][key] = data['target'][key]
+                data['script'][key2] = evaluate_external_script(script, fn, data['target'])
+                data_sizes[p][s]['script'] = list(np.shape(data['script'][key2]))
         except Exception as e:
             errors.append(str(e))
 
     # Reshape data if necessary so that they have a predictable number of dimensions
     for k in data.keys():
         for p, s in curve:
+            key = f'{p}'
+            if s != DEFAULT_SET_NAME:
+                key += f' {s}'
             if (len(data_sizes[p][s][k]) == 1):
-                data[k][f'{p} {s}'] = np.reshape(data[k][f'{p} {s}'], (-1, 1, 1))
+                data[k][key] = np.reshape(data[k][key], (-1, 1, 1))
                 data_sizes[p][s][k].append(1)
             elif (len(data_sizes[p][s][k]) == 2):
-                data[k][f'{p} {s}'] = np.expand_dims(data[k][f'{p} {s}'], -1)
+                data[k][key] = np.expand_dims(data[k][key], -1)
                 data_sizes[p][s][k].append(1)
 
     # Check data diffs
     size_err = '{}_{} values have different sizes: target=({},{},{}) baseline=({},{},{})'
     for p, set_data in data_sizes.items():
         for s, set_sizes in set_data.items():
+            key = f'{p}'
+            if s != DEFAULT_SET_NAME:
+                key += f' {s}'
+
             if (('baseline' in set_sizes) and ('target' in set_sizes)):
-                xa = data['target'][f'{p} {s}']
-                xb = data['baseline'][f'{p} {s}']
+                xa = data['target'][key]
+                xb = data['baseline'][key]
                 if set_sizes['target'] == set_sizes['baseline']:
                     check_diff(p, s, xa, xb, tol[p][s], errors)
                 else:
@@ -285,8 +310,8 @@ def compare_time_history_curves(fname, baseline, curve, tolerance, output, outpu
                     else:
                         errors.append(f'Cannot perform a curve check for {p}_{s}')
             if (('script' in set_sizes) and ('target' in set_sizes)):
-                xa = data['target'][f'{p} {s}']
-                xb = data['script'][f'{p} {s}']
+                xa = data['target'][key]
+                xb = data['script'][key]
                 check_diff(p, s, xa, xb, tol[p][s], errors, modifier='script')
 
     # Render figures
@@ -306,14 +331,42 @@ def curve_check_parser():
     Returns:
         argparse.parser: The curve check parser
     """
+
+   # Custom action class
+    class PairAction(argparse.Action):
+        def __call__(self, parser, namespace, values, option_string=None):
+            pairs = getattr(namespace, self.dest)
+            if len(values) == 1:
+                pairs.append((values[0], DEFAULT_SET_NAME))
+            elif len(values) == 2:
+                pairs.append((values[0], values[1]))
+            else:
+                raise Exception('Only a single value or a pair of values are expected')
+             
+            setattr(namespace, self.dest, pairs)
+
+    # Custom action class
+    class ScriptAction(argparse.Action):
+        def __call__(self, parser, namespace, values, option_string=None):
+            
+            scripts = getattr(namespace, self.dest)
+            scripts.append(values)
+            N = len(values)
+            if (N < 3) or (N > 4):
+                raise Exception ('The -s option requires 3 or 4 inputs')
+            elif N == 3:
+                values.append(DEFAULT_SET_NAME)
+                
+            setattr(namespace, self.dest, scripts)        
+
     parser = argparse.ArgumentParser()
     parser.add_argument("filename", help="Path to the time history file")
     parser.add_argument("baseline", help="Path to the baseline file")
     parser.add_argument('-c',
                         '--curve',
                         nargs='+',
-                        action='append',
-                        help='Curves to check (value, setname)',
+                        action=PairAction,
+                        help='Curves to check (value) or (value, setname)',
                         default=[])
     parser.add_argument("-t",
                         "--tolerance",
@@ -343,7 +396,7 @@ def curve_check_parser():
     parser.add_argument("-s",
                         "--script",
                         nargs='+',
-                        action='append',
+                        action=ScriptAction,
                         help='Python script instructions (path, function, value, setname)',
                         default=[])
 

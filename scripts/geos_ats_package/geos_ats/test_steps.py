@@ -623,7 +623,7 @@ class restartcheck(CheckTestStepBase):
             data_dir_path = os.path.splitext(root_baseline_path)[0]
             shutil.rmtree(data_dir_path)
         else:
-            os.makedirs(baseline_dir)
+            os.makedirs(baseline_dir, exist_ok=True)
 
         # Copy the root file into the baseline directory.
         shutil.copy2(root_file_path, os.path.join(baseline_dir, os.path.basename(root_file_path)))
@@ -726,8 +726,8 @@ class curvecheck(CheckTestStepBase):
 
         if self.p.curves is not None:
             for c in self.p.curves.split(';'):
-                p, s = c.split(',')
-                args += ["-c", p, s]
+                args += ["-c"]
+                args +=  c.split(',') 
         if self.p.tolerance is not None:
             for t in self.p.tolerance.split(','):
                 args += ["-t", t]
@@ -735,8 +735,8 @@ class curvecheck(CheckTestStepBase):
             args += ["-u", self.p.time_units]
         if self.p.script_instructions is not None:
             for c in self.p.script_instructions.split(';'):
-                script, fn, p, s = c.split(',')
-                args += ["-s", script, fn, p, s]
+                args += ["-s"]
+                args += c.split(',')
         if self.p.warnings_are_errors:
             args += ["-w"]
 
@@ -748,7 +748,9 @@ class curvecheck(CheckTestStepBase):
         if not self.p.allow_rebaseline:
             Log("Rebaseline not allowed for curvecheck of %s." % self.p.name)
             return
-
+        
+        baseline_dir = os.path.split(self.baseline_file)[0]
+        os.makedirs(baseline_dir, exist_ok=True)
         shutil.copyfile(self.target_file, self.baseline_file)
 
     def resultPaths(self):

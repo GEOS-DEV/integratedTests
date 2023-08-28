@@ -17,18 +17,18 @@ class RestartcheckParameters:
 @dataclass
 class CurveCheckParameters:
     filename: str
-    tolerance: list[float]
-    script_instructions: list[list[str]]
+    tolerance: Iterable[float]
+    script_instructions: Iterable[Iterable[str]]
     curves: list[list[str]]
 
     def as_dict(self):
         return asdict(self)
-
+    
 @dataclass
 class TestDeck:
     name: str
     description: str
-    partitions: list[tuple[int, int, int]]
+    partitions: Iterable[tuple[int, int, int]]
     restart_step: int
     check_step: int
     restartcheck_params: RestartcheckParameters = None

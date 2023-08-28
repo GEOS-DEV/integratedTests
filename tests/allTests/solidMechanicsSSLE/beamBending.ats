@@ -1,46 +1,36 @@
-restartcheck_params = {}
-restartcheck_params["atol"] = 1.0E-3
-restartcheck_params["rtol"] = 1.0E-7
+import geos_ats 
+from geos_ats.test_builder import RestartcheckParameters, CurveCheckParameters, TestDeck, generate_geos_tests
 
-curvecheck_params = {}
-curvecheck_params['filename'] = 'displacement_history.hdf5'
-curvecheck_params['tolerance'] = 0.0002
-curvecheck_params['script_instructions'] = [['./beamBending_curve.py', 'curve', 'totalDisplacement', 'trace']]
-curvecheck_params['curves'] = [['totalDisplacement', 'trace']]
+restartcheck_params = RestartcheckParameters( atol=1.0E-3, rtol=1.0E-7 )
 
-# partitions = ((1, 1, 1), (2, 2, 2), (3, 3, 3))
+curvecheck_params = CurveCheckParameters(filename='displacement_history.hdf5',
+                                         tolerance=[0.0002],
+                                         script_instructions=[['./beamBending_curve.py', 'curve', 'totalDisplacement', 'trace']],
+                                         curves = [['totalDisplacement', 'trace']])
+
 partitions = ((1, 1, 1), (2, 2, 2))
 
-beamBending = {
-    "name": "beamBending",
-    "description": "Tests beam bending",
-    "partitions": partitions,
-    "restart_step": 0,
-    "check_step": 1
-}
+decks = [ TestDeck(name= "beamBending",
+                   description="Tests beam bending.",
+                   partitions= partitions,
+                   restart_step=0,
+                   check_step=1,
+                   restartcheck_params=restartcheck_params,
+                   curvecheck_params=curvecheck_params ),
+          TestDeck(name= "beamBending_vem_smoke",
+                   description="Tests beam bending applying Virtual Elements.",
+                   partitions= partitions,
+                   restart_step=0,
+                   check_step=1,
+                   restartcheck_params=restartcheck_params,
+                   curvecheck_params=curvecheck_params ),
+          TestDeck(name= "beamBending_hybridHexPrism_smoke",
+                   description="Tests beam bending on general polyhedral mesh.",
+                   partitions= partitions,
+                   restart_step=0,
+                   check_step=1,
+                   restartcheck_params=restartcheck_params,
+                   curvecheck_params=curvecheck_params )
+         ]
 
-beamBending_vem = {
-    "name": "beamBending_vem_smoke",
-    "description": "Tests beam bending applying Virtual Elements.",
-    "partitions": partitions,
-    "restart_step": 0,
-    "check_step": 1
-}
-
-beamBending_hybridHexPrism = {
-    "name": "beamBending_hybridHexPrism_smoke",
-    "description": "Tests beam bending on general polyhedral mesh",
-    "partitions": partitions,
-    "restart_step": 0,
-    "check_step": 1
-}
-
-decks = ( beamBending,
-          beamBending_vem,
-          beamBending_hybridHexPrism )
-
-
-import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_from_dictionary
-
-generate_geos_tests_from_dictionary( decks, restartcheck_params, curvecheck_params )
+generate_geos_tests( decks )

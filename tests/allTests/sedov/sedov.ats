@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-import os
-
-# Integrated Test Docs Begin Parameters
-=======
->>>>>>> b93b3f3 (Initial commit.)
 restartcheck_params = {}
 restartcheck_params["atol"] = 2.0E-10
 restartcheck_params["rtol"] = 2.0E-13
@@ -15,47 +9,19 @@ curvecheck_params['time_units'] = 'milliseconds'
 curvecheck_params['curves'] = [['velocity', 'source']]
 
 partitions = ((1, 1, 1), (2, 2, 2), (3, 3, 3))
-<<<<<<< HEAD
-# Integrated Test Docs End Parameters
 
-# Integrated Test Docs Begin Test Loop
-for nx, ny, nz in partitions:
-    N = nx * ny * nz
-=======
->>>>>>> b93b3f3 (Initial commit.)
+sedov = {
+    "name": "sedov",
+    "description": "Test the basic sedov problem and restart capabilities",
+    "partitions": partitions,
+    "restart_step": 50,
+    "check_step": 100
+}
+
+decks = ( sedov, )
 
 import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_5
-
-<<<<<<< HEAD
-    TestCase(name=testcase_name,
-             desc="Test the basic sedov problem and restart capabilities on %d ranks." % N,
-             label="auto",
-             owner="Ben Corbett",
-             independent=True,
-             steps=(geos(deck="sedov.xml",
-                         np=N,
-                         ngpu=N,
-                         x_partitions=nx,
-                         y_partitions=ny,
-                         z_partitions=nz,
-                         name="0to100",
-                         restartcheck_params=restartcheck_params,
-                         curvecheck_params=curvecheck_params,
-                         ),
-                    geos(deck="sedov.xml",
-                         np=N,
-                         ngpu=N,
-                         x_partitions=nx,
-                         y_partitions=ny,
-                         z_partitions=nz,
-                         name="50to100",
-                         restart_file=os.path.join(testcase_name, "0to100_restart_000000050"),
-                         baseline_pattern="0to100_restart_[0-9]+\.root",
-                         allow_rebaseline=False,
-                         restartcheck_params=restartcheck_params)))
+from geos_ats.test_builder import generate_geos_tests_from_dictionary
 
 # Integrated Test Docs End Test Loop
-=======
-generate_geos_tests_5( partitions, restartcheck_params, curvecheck_params )
->>>>>>> b93b3f3 (Initial commit.)
+generate_geos_tests_from_dictionary( decks, restartcheck_params, curvecheck_params )

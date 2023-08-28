@@ -11,7 +11,36 @@ curvecheck_params['curves'] = [['totalDisplacement', 'trace']]
 # partitions = ((1, 1, 1), (2, 2, 2), (3, 3, 3))
 partitions = ((1, 1, 1), (2, 2, 2))
 
-import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_4
+beamBending = {
+    "name": "beamBending",
+    "description": "Tests beam bending",
+    "partitions": partitions,
+    "restart_step": 0,
+    "check_step": 1
+}
 
-generate_geos_tests_4( partitions, restartcheck_params, curvecheck_params )
+beamBending_vem = {
+    "name": "beamBending_vem_smoke",
+    "description": "Tests beam bending applying Virtual Elements.",
+    "partitions": partitions,
+    "restart_step": 0,
+    "check_step": 1
+}
+
+beamBending_hybridHexPrism = {
+    "name": "beamBending_hybridHexPrism_smoke",
+    "description": "Tests beam bending on general polyhedral mesh",
+    "partitions": partitions,
+    "restart_step": 0,
+    "check_step": 1
+}
+
+decks = ( beamBending,
+          beamBending_vem,
+          beamBending_hybridHexPrism )
+
+
+import geos_ats 
+from geos_ats.test_builder import generate_geos_tests_from_dictionary
+
+generate_geos_tests_from_dictionary( decks, restartcheck_params, curvecheck_params )

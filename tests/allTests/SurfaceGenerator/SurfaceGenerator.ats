@@ -6,20 +6,13 @@ restartcheck_params["rtol"] = 2.0E-10
 
 partitions = ((1, 1, 1), (2, 2, 2))
 
-decksDryFrac = ((
-    "DryFrac_StaticPenny_PrismElem", "Testing the SIF calculation (node-based) for a penny-shaped fracture"
-), (
-    "DryFrac_ThreeNodesPinched_HorizontalFrac",
-    "Testing the SIF calculation (node-based) under three nodes pinched scenario (fracture plane parallel to model boundary)"
-), ("DryFrac_ThreeNodesPinched_SlantFrac",
-    "Testing the SIF calculation (node-based) under three nodes pinched scenario (fracture plane for an angle of 45 degree with model boundary)"
-    ))
-
-
-
-
+decksDryFrac = ( ("SurfaceGenerator", "Test the basic surface generator problem and restart capabilities.", partitions, 2, 3),
+    ("DryFrac_StaticPenny_PrismElem", "Testing the SIF calculation (node-based) for a penny-shaped fracture", partitions, 0, 2), 
+    ( "DryFrac_ThreeNodesPinched_HorizontalFrac", "Testing the SIF calculation (node-based) under three nodes pinched scenario (fracture plane parallel to model boundary)", partitions, 0, 2), 
+    ("DryFrac_ThreeNodesPinched_SlantFrac", "Testing the SIF calculation (node-based) under three nodes pinched scenario (fracture plane for an angle of 45 degree with model boundary)", partitions, 0, 2)
+    )
 
 import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_3
+from geos_ats.test_builder import generate_geos_tests_from_values
 
-generate_geos_tests_3( decksDryFrac, partitions, restartcheck_params )
+generate_geos_tests_from_values( decksDryFrac, restartcheck_params )

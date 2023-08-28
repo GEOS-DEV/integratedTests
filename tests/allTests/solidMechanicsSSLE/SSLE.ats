@@ -6,7 +6,17 @@ restartcheck_params["rtol"] = 2.0E-13
 
 partitions = ((1, 1, 1), (2, 2, 2), (3, 3, 3))
 
-import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_8
+sedovSSLE = {
+    "name": "SSLE-sedov",
+    "description": "Test the small strain linear elastic solver",
+    "partitions": partitions,
+    "restart_step": 50,
+    "check_step": 100
+}
 
-generate_geos_tests_8( partitions, restartcheck_params )
+decks = ( sedovSSLE, )
+
+import geos_ats 
+from geos_ats.test_builder import generate_geos_tests_from_dictionary
+
+generate_geos_tests_from_dictionary( decks, restartcheck_params )

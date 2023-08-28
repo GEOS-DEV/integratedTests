@@ -176,6 +176,6 @@ decks = (kgd_viscosity_dominated,
          )
 
 import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_2
+from geos_ats.test_builder import generate_geos_tests_from_dictionary
 
-generate_geos_tests_2( decks )
+generate_geos_tests_from_dictionary( decks, restartcheck_params, curvecheck_params_base )

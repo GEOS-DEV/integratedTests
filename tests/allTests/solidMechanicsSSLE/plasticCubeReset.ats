@@ -6,7 +6,17 @@ restartcheck_params["rtol"] = 1.0E-5
 
 partitions = ((1, 1, 1), (1, 1, 2))
 
-import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_7
+plasticCubeReset = {
+    "name": "plasticCubeReset",
+    "description": "Test the initialization step of for solid mechanics",
+    "partitions": partitions,
+    "restart_step": 4,
+    "check_step": 7
+}
 
-generate_geos_tests_7( partitions, restartcheck_params )
+decks = ( plasticCubeReset, )
+
+import geos_ats 
+from geos_ats.test_builder import generate_geos_tests_from_dictionary
+
+generate_geos_tests_from_dictionary( decks, restartcheck_params )

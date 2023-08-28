@@ -15,6 +15,6 @@ decks = (("acous3D_abc_smoke", "Acoustic wave solver, first-order FE, absorbing 
                  ((1, 1, 1), (2, 2, 2)), 100, 200))
 
 import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_1
+from geos_ats.test_builder import generate_geos_tests_from_values
 
-generate_geos_tests_1( decks, restartcheck_params )
+generate_geos_tests_from_values( decks, restartcheck_params )

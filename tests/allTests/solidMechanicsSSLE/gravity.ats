@@ -6,7 +6,17 @@ restartcheck_params["rtol"] = 1.0E-5
 
 partitions = ((1, 1, 1), (1, 1, 2))
 
-import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_6
+gravity = {
+    "name": "gravity",
+    "description": "Test the gravity application in solid mechanics solver",
+    "partitions": partitions,
+    "restart_step": 1,
+    "check_step": 2
+}
 
-generate_geos_tests_6( partitions, restartcheck_params )
+decks = ( gravity, )
+
+import geos_ats 
+from geos_ats.test_builder import generate_geos_tests_from_dictionary
+
+generate_geos_tests_from_dictionary( decks, restartcheck_params )

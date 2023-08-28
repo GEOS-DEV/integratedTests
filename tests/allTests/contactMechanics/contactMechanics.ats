@@ -14,6 +14,6 @@ decks = (("ContactMechanics_SimpleCubes", "Two cubes with a fracture separating 
           "Single tilted fracture subjected to remote compression (unstructured grid)", ((1, 1, 1), (0, 0, 0)), 1, 2))
 
 import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_1
+from geos_ats.test_builder import generate_geos_tests_from_values
 
-generate_geos_tests_1( decks, restartcheck_params )
+generate_geos_tests_from_values( decks, restartcheck_params )

@@ -22,6 +22,6 @@ decks = (
      "Testing the Laplace solver with the Virtual Element Method (hexahedra and prisms)", ((1, 1, 1), (3, 1, 1)), 1, 2))
 
 import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_1
+from geos_ats.test_builder import generate_geos_tests_from_values
 
-generate_geos_tests_1( decks, restartcheck_params )
+generate_geos_tests_from_values( decks, restartcheck_params )

@@ -5,34 +5,6 @@ restartcheck_params["atol"] = 1.0E-5
 restartcheck_params["rtol"] = 2.0E-10
 
 partitions = ((1, 1, 1), (2, 2, 2))
-for nx, ny, nz in partitions:
-    N = nx * ny * nz
-
-    testcase_name = "SurfaceGenerator_%02d" % N
-    TestCase(name=testcase_name,
-             desc="Test the basic surface generator problem and restart capabilities.",
-             label="auto",
-             owner="R Settgast",
-             independent=True,
-             steps=(geos(deck="SurfaceGenerator.xml",
-                         name="0to3",
-                         np=N,
-                         ngpu=N,
-                         x_partitions=nx,
-                         y_partitions=ny,
-                         z_partitions=nz,
-                         restartcheck_params=restartcheck_params),
-                    geos(deck="SurfaceGenerator.xml",
-                         name="2to3",
-                         np=N,
-                         ngpu=N,
-                         x_partitions=nx,
-                         y_partitions=ny,
-                         z_partitions=nz,
-                         restart_file=os.path.join(testcase_name, "0to3_restart_000000001"),
-                         baseline_pattern="0to3_restart_[0-9]+\.root",
-                         allow_rebaseline=False,
-                         restartcheck_params=restartcheck_params)))
 
 decksDryFrac = ((
     "DryFrac_StaticPenny_PrismElem", "Testing the SIF calculation (node-based) for a penny-shaped fracture"
@@ -43,25 +15,11 @@ decksDryFrac = ((
     "Testing the SIF calculation (node-based) under three nodes pinched scenario (fracture plane for an angle of 45 degree with model boundary)"
     ))
 
-for deck, description in decksDryFrac:
-    for partition in partitions:
-        nx = partition[0]
-        ny = partition[1]
-        nz = partition[2]
-        N = nx * ny * nz
 
-        testcase_name = "%s_%02d" % (deck, N)
 
-        TestCase(name=testcase_name,
-                 desc=description,
-                 label="auto",
-                 owner="H Wu",
-                 independent=True,
-                 steps=(geos(deck=deck + ".xml",
-                             name=deck,
-                             np=N,
-                             ngpu=N,
-                             x_partitions=nx,
-                             y_partitions=ny,
-                             z_partitions=nz,
-                             restartcheck_params=restartcheck_params), ))
+
+
+import geos_ats 
+from geos_ats.test_builder import generate_geos_tests_3
+
+generate_geos_tests_3( decksDryFrac, partitions, restartcheck_params )

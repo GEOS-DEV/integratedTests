@@ -175,57 +175,7 @@ decks = (kgd_viscosity_dominated,
          walsh_quarter_no_chombo
          )
 
-cases = []
+import geos_ats 
+from geos_ats.test_builder import generate_geos_tests_2
 
-
-for deck in decks:
-    # deck, description, partitions, restart_step, num_steps
-    for partition in deck["partitions"]:
-        nx = partition[0]
-        ny = partition[1]
-        nz = partition[2]
-        N = nx * ny * nz
-        testcase_name = "{}_{:02d}".format(deck["name"], N)
-        base_name = "0to{:d}".format(deck["check_step"])
-
-        curvecheck_params = None
-        if ("aperture_curve_method" in deck) and ("pressure_curve_method" in deck):
-            curvecheck_params = curvecheck_params_base.copy()
-            curvecheck_params["script_instructions"][0][1] = deck["aperture_curve_method"]
-            curvecheck_params["script_instructions"][1][1] = deck["pressure_curve_method"]
-
-        if (curvecheck_params is not None) and ("tolerance" in deck):
-            curvecheck_params["tolerance"] = deck["tolerance"]
-
-        steps = [geos(deck="{}.xml".format(deck["name"]),
-                      name=base_name,
-                      np=N,
-                      ngpu=N,
-                      x_partitions=nx,
-                      y_partitions=ny,
-                      z_partitions=nz,
-                      restartcheck_params=restartcheck_params,
-                      curvecheck_params=curvecheck_params)]
-
-        if deck["restart_step"] > 0:
-            steps.append(geos(deck="{}.xml".format(deck["name"]),
-                           name="{:d}to{:d}".format(deck["restart_step"], deck["check_step"]),
-                           np=N,
-                           ngpu=N,
-                           x_partitions=nx,
-                           y_partitions=ny,
-                           z_partitions=nz,
-                           restart_file=os.path.join(testcase_name, "{}_restart_{:09d}".format(base_name, deck["restart_step"])),
-                           baseline_pattern=f"{base_name}_restart_[0-9]+\.root",
-                           allow_rebaseline=False,
-                           restartcheck_params=restartcheck_params))
-
-        tmp = TestCase(name=testcase_name,
-                 desc=deck["description"],
-                 label="auto",
-                 owner="Tao Jin, Jian Huang, Christopher Sherman",
-                 independent=True,
-                 steps=steps)
-
-        cases.append(tmp)
-
+generate_geos_tests_2( decks )

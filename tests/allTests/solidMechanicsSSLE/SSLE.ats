@@ -5,31 +5,8 @@ restartcheck_params["atol"] = 1.0E-10
 restartcheck_params["rtol"] = 2.0E-13
 
 partitions = ((1, 1, 1), (2, 2, 2), (3, 3, 3))
-for nx, ny, nz in partitions:
-    N = nx * ny * nz
 
-    testcase_name = "SSLE-sedov_%02d" % N
-    TestCase(name=testcase_name,
-             desc="Test the small strain linear elastic solver on %d ranks." % N,
-             label="auto",
-             owner="RRS",
-             independent=True,
-             steps=(geos(deck="SSLE-sedov.xml",
-                         name="0to100",
-                         np=N,
-                         ngpu=N,
-                         x_partitions=nx,
-                         y_partitions=ny,
-                         z_partitions=nz,
-                         restartcheck_params=restartcheck_params),
-                    geos(deck="SSLE-sedov.xml",
-                         name="50to100",
-                         np=N,
-                         ngpu=N,
-                         x_partitions=nx,
-                         y_partitions=ny,
-                         z_partitions=nz,
-                         restart_file=os.path.join(testcase_name, "0to100_restart_000000050"),
-                         baseline_pattern="0to100_restart_[0-9]+\.root",
-                         allow_rebaseline=False,
-                         restartcheck_params=restartcheck_params)))
+import geos_ats 
+from geos_ats.test_builder import generate_geos_tests_8
+
+generate_geos_tests_8( partitions, restartcheck_params )

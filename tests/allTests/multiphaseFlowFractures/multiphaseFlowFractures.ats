@@ -8,41 +8,7 @@ decks = (("deadOil_fractureMatrixFlow_edfm_horizontalFrac", "Multiphase flow EDF
          ("deadOil_fractureMatrixFlow_edfm_inclinedFrac", "Multiphase flow EDFM inclined frac.", ((1, 1, 1), (2, 2, 1)),
           0, 29))
 
-for deck, description, partitions, restart, num_steps in decks:
-    for partition in partitions:
-        nx = partition[0]
-        ny = partition[1]
-        nz = partition[2]
-        N = nx * ny * nz
+import geos_ats 
+from geos_ats.test_builder import generate_geos_tests_1
 
-        testcase_name = "%s_%02d" % (deck, N)
-        base_name = "0to%d" % num_steps
-
-        steps = (geos(deck=deck + ".xml",
-                      name=base_name,
-                      np=N,
-                      ngpu=N,
-                      x_partitions=nx,
-                      y_partitions=ny,
-                      z_partitions=nz,
-                      restartcheck_params=restartcheck_params), )
-
-        if restart > 0:
-            steps += (geos(deck=deck + ".xml",
-                           name="%dto%d" % (restart, num_steps),
-                           np=N,
-                           ngpu=N,
-                           x_partitions=nx,
-                           y_partitions=ny,
-                           z_partitions=nz,
-                           restart_file=os.path.join(testcase_name, "%s_restart_%09d" % (base_name, restart)),
-                           baseline_pattern="%s_restart_[0-9]+\.root" % base_name,
-                           allow_rebaseline=False,
-                           restartcheck_params=restartcheck_params), )
-
-        TestCase(name=testcase_name,
-                 desc=description,
-                 label="auto",
-                 owner="Sergey Klevtsov",
-                 independent=True,
-                 steps=steps)
+generate_geos_tests_1( decks, restartcheck_params )

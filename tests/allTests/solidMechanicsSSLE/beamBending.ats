@@ -8,54 +8,10 @@ curvecheck_params['tolerance'] = 0.0002
 curvecheck_params['script_instructions'] = [['./beamBending_curve.py', 'curve', 'totalDisplacement', 'trace']]
 curvecheck_params['curves'] = [['totalDisplacement', 'trace']]
 
-
 # partitions = ((1, 1, 1), (2, 2, 2), (3, 3, 3))
 partitions = ((1, 1, 1), (2, 2, 2))
-for partition in partitions:
-    nx = partition[0]
-    ny = partition[1]
-    nz = partition[2]
-    N = nx * ny * nz
 
-    TestCase(name="beamBending_%02d" % N,
-             desc="Tests beam bending on %d ranks." % N,
-             label="auto",
-             owner="Ben Corbett",
-             independent=True,
-             steps=(geos(deck="beamBending.xml",
-                         name="beamBending",
-                         np=N,
-                         ngpu=N,
-                         x_partitions=nx,
-                         y_partitions=ny,
-                         z_partitions=nz,
-                         restartcheck_params=restartcheck_params,
-                         curvecheck_params=curvecheck_params), ))
+import geos_ats 
+from geos_ats.test_builder import generate_geos_tests_4
 
-    TestCase(name="beamBending_vem_%02d" % N,
-             desc="Tests beam bending on %d ranks applying Virtual Elements." % N,
-             label="auto",
-             owner="Andrea Borio",
-             independent=True,
-             steps=(geos(deck="beamBending_vem_smoke.xml",
-                         name="beamBending_vem",
-                         np=N,
-                         ngpu=N,
-                         x_partitions=nx,
-                         y_partitions=ny,
-                         z_partitions=nz,
-                         restartcheck_params=restartcheck_params), ))
-
-    TestCase(name="beamBending_hybridHexPrism_%02d" % N,
-             desc="Tests beam bending on %d ranks on general polyhedral mesh." % N,
-             label="auto",
-             owner="Andrea Borio",
-             independent=True,
-             steps=(geos(deck="beamBending_hybridHexPrism_smoke.xml",
-                         name="beamBending_hybridHexPrism",
-                         np=N,
-                         ngpu=N,
-                         x_partitions=nx,
-                         y_partitions=ny,
-                         z_partitions=nz,
-                         restartcheck_params=restartcheck_params), ))
+generate_geos_tests_4( partitions, restartcheck_params, curvecheck_params )

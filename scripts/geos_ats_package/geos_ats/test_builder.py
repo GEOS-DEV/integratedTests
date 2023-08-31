@@ -34,17 +34,6 @@ class TestDeck:
     check_step: int
     restartcheck_params: RestartcheckParameters = None
     curvecheck_params: CurveCheckParameters = None
-    
-    @classmethod
-    def from_dict(cls, data_dict, restartcheck_params):
-        return cls(
-            name=data_dict["name"],
-            description=data_dict["description"],
-            partitions=data_dict["partitions"],
-            restart_step=data_dict["restart_step"],
-            check_step=data_dict["check_step"],
-            restartcheck_params=restartcheck_params
-        )
 
 def generate_geos_tests( decks: Iterable[TestDeck] ):
     """

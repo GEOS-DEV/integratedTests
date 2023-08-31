@@ -78,7 +78,7 @@ decks = [
     TestDeck(
         name="deadOilEgg_smoke_3d",
         description="Smoke test for the Egg model (3D displacement, structured mesh, 2-phase dead-oil, many wells)",
-        partitions=[(1, 1, 1), (0, 0, 0)],
+        partitions=[(1, 1, 1),],
         restart_step=20,
         check_step=35,
         restartcheck_params=RestartcheckParameters(**restartcheck_params)

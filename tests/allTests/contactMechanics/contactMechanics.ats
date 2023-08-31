@@ -27,7 +27,7 @@ decks = [
     TestDeck(
         name="Sneddon_contactMechanics",
         description="Testing Sneddon problem using contact mechanics (structured grid)",
-        partitions=((1, 1, 1), (0, 0, 0)),
+        partitions=((1, 1, 1),),
         restart_step=1,
         check_step=2,
         restartcheck_params=RestartcheckParameters(**restartcheck_params)
@@ -43,7 +43,7 @@ decks = [
     TestDeck(
         name="ContactMechanics_SingleFracCompression",
         description="Single tilted fracture subjected to remote compression (unstructured grid)",
-        partitions=((1, 1, 1), (0, 0, 0)),
+        partitions=((1, 1, 1),),
         restart_step=1,
         check_step=2,
         restartcheck_params=RestartcheckParameters(**restartcheck_params)

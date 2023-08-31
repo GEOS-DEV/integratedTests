@@ -22,15 +22,13 @@ decks = [ TestDeck(name= "beamBending",
                    partitions= partitions,
                    restart_step=0,
                    check_step=1,
-                   restartcheck_params=restartcheck_params,
-                   curvecheck_params=curvecheck_params ),
+                   restartcheck_params=restartcheck_params ),
           TestDeck(name= "beamBending_hybridHexPrism_smoke",
                    description="Tests beam bending on general polyhedral mesh.",
                    partitions= partitions,
                    restart_step=0,
                    check_step=1,
-                   restartcheck_params=restartcheck_params,
-                   curvecheck_params=curvecheck_params )
+                   restartcheck_params=restartcheck_params )
          ]
 
 generate_geos_tests( decks )

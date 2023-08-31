@@ -1,10 +1,6 @@
-import geos_ats 
-from geos_ats.test_builder import generate_geos_tests_from_dictionary
+import geos_ats
+from geos_ats.test_builder import generate_geos_tests, RestartcheckParameters, CurveCheckParameters, TestDeck
 
-# Check parameters
-restartcheck_params = {}
-restartcheck_params["atol"] = 2.0E-4
-restartcheck_params["rtol"] = 1.0E-7
 
 curvecheck_params_base = {}
 curvecheck_params_base["filename"] = "hydrofracture_source_curves.hdf5"
@@ -12,7 +8,6 @@ curvecheck_params_base["tolerance"] = [1e-10, 1e-10]
 curvecheck_params_base["script_instructions"] = [["./hydrofractureCurveChecks.py", "tbd", "hydraulicAperture", "source"],
                                                  ["./hydrofractureCurveChecks.py", "tbd", "pressure", "source"]]
 curvecheck_params_base["curves"] = [["hydraulicAperture", "source"], ["pressure", "source"]]
-
 
 # Define cases
 kgd_viscosity_dominated = {
@@ -177,4 +172,32 @@ decks = (kgd_viscosity_dominated,
          walsh_quarter_no_chombo
          )
 
-generate_geos_tests_from_dictionary( decks, restartcheck_params, curvecheck_params_base )
+
+# Check parameters
+restartcheck_params = RestartcheckParameters( atol=2.0E-4, rtol=1.0E-7 )
+
+deck_instances = []
+for deck in decks:
+    if ("aperture_curve_method" in deck) and ("pressure_curve_method" in deck):
+        curvecheck_params = curvecheck_params_base.copy()
+        curvecheck_params["script_instructions"][0][1] = deck["aperture_curve_method"]
+        curvecheck_params["script_instructions"][1][1] = deck["pressure_curve_method"]
+                
+    if  ("tolerance" in deck):
+        curvecheck_params["tolerance"] = deck["tolerance"]
+        curvecheck_params = CurveCheckParameters(**curvecheck_params)
+    else:
+        curvecheck_params = None
+
+    deck_instance = TestDeck( name=deck["name"],
+                             description= deck["description"],
+                             partitions= deck["partitions"],
+                             restart_step= deck["restart_step"],
+                             check_step= deck["check_step"],
+                             restartcheck_params=restartcheck_params,
+                             curvecheck_params=curvecheck_params )                   
+
+    deck_instances.append(deck_instance)
+
+
+generate_geos_tests( deck_instances )  

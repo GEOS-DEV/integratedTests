@@ -6,7 +6,7 @@ from .test_steps import geos
 from .test_case import TestCase
 
 
-@dataclass    
+@dataclass(frozen=True)    
 class RestartcheckParameters:
     atol: float
     rtol: float
@@ -14,17 +14,18 @@ class RestartcheckParameters:
     def as_dict(self):
         return asdict(self)
 
-@dataclass
+@dataclass(frozen=True)
 class CurveCheckParameters:
     filename: str
     tolerance: Iterable[float]
     script_instructions: Iterable[Iterable[str]]
     curves: list[list[str]]
+    time_units: str = "seconds"
 
     def as_dict(self):
         return asdict(self)
     
-@dataclass
+@dataclass(frozen=True)
 class TestDeck:
     name: str
     description: str
@@ -35,13 +36,14 @@ class TestDeck:
     curvecheck_params: CurveCheckParameters = None
     
     @classmethod
-    def from_dict(cls, data_dict):
+    def from_dict(cls, data_dict, restartcheck_params):
         return cls(
             name=data_dict["name"],
             description=data_dict["description"],
             partitions=data_dict["partitions"],
             restart_step=data_dict["restart_step"],
-            check_step=data_dict["check_step"]
+            check_step=data_dict["check_step"],
+            restartcheck_params=restartcheck_params
         )
 
 def generate_geos_tests( decks: Iterable[TestDeck] ):
@@ -95,34 +97,7 @@ def generate_geos_tests( decks: Iterable[TestDeck] ):
                      owner="GEOS team",
                      independent=True,
                      steps=steps)
-   
-            
-def generate_geos_tests_from_dictionary( decks, restartcheck_params, curvecheck_params_base=None ):
-    """
-    """
-    
-    restartcheck_params_instance = RestartcheckParameters(**restartcheck_params)
-    deck_instances = []
         
-    for deck in decks:
-            
-        deck_instance = TestDeck.from_dict( deck )
-        deck_instance.restartcheck_params = restartcheck_params_instance
+    
 
-        if curvecheck_params_base is not None:
-            if ("aperture_curve_method" in deck) and ("pressure_curve_method" in deck):
-                curvecheck_params = curvecheck_params_base.copy()
-                curvecheck_params["script_instructions"][0][1] = deck["aperture_curve_method"]
-                curvecheck_params["script_instructions"][1][1] = deck["pressure_curve_method"]
-                
-                if  ("tolerance" in deck):
-                    curvecheck_params["tolerance"] = deck["tolerance"]
-
-                deck_instance.curvecheck_params = CurveCheckParameters(**curvecheck_params)
-
-            elif("script_instructions" in curvecheck_params_base):
-                deck_instance.curvecheck_params = CurveCheckParameters(**curvecheck_params_base)         
-
-        deck_instances.append(deck_instance)
-
-    generate_geos_tests( deck_instances )            
+              

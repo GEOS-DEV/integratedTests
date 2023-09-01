@@ -77,8 +77,7 @@ def generate_geos_tests( decks: Iterable[TestDeck] ):
                             restart_file=os.path.join(testcase_name, "{}_restart_{:09d}".format(base_name, deck.restart_step) ),
                             baseline_pattern=f"{base_name}_restart_[0-9]+\.root",
                             allow_rebaseline=False,
-                            restartcheck_params=restartcheck_params,
-                            curvecheck_params=curvecheck_params ) )
+                            restartcheck_params=restartcheck_params ) )
 
             TestCase(name=testcase_name,
                      desc=deck.description,

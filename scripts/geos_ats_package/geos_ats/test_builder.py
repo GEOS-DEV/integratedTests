@@ -18,8 +18,8 @@ class RestartcheckParameters:
 class CurveCheckParameters:
     filename: str
     tolerance: Iterable[float]
-    script_instructions: Iterable[Iterable[str]]
     curves: list[list[str]]
+    script_instructions: Iterable[Iterable[str]]=None
     time_units: str = "seconds"
 
     def as_dict(self):

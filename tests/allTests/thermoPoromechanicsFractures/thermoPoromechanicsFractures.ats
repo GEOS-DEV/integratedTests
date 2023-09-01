@@ -1,47 +1,21 @@
-# format: (<input>, <desc>, <partition_list>, <restart_step>, <total_steps>, <restartcheck_params>)
-decks = (("ThermoPoroElastic_efem-edfm_verticalFrac",
-          "Thermoporoelastic case with an embeded fracture", 
-          ((1, 1, 1), (2, 2, 1)), 10, 10, {"atol": 1.0E-6, "rtol": 4.0E-6}),
-         ("ThermoPoroElastic_conforming",
-          "Thermoporoelastic case with a conforming fracture",
-          ((1, 1, 1), (2, 2, 1)), 10, 10, {"atol": 1.0E-6, "rtol": 4.0E-6}))
 
-for deck, description, partitions, restart, num_steps, restartcheck_params in decks:
-    for partition in partitions:
-        nx = partition[0]
-        ny = partition[1]
-        nz = partition[2]
-        N = nx * ny * nz
+import os
+import geos_ats
+from geos_ats.test_builder import TestDeck, RestartcheckParameters, generate_geos_tests
 
-        if N > 0:
-            testcase_name = "%s_%02d" % (deck, N)
-            base_name = "0to%d" % num_steps
+restartcheck_params = {'atol': 1e-06, 'rtol': 4e-06}
 
-            steps = (geos(deck=deck + ".xml",
-                          name=base_name,
-                          np=N,
-                          ngpu=N,
-                          x_partitions=nx,
-                          y_partitions=ny,
-                          z_partitions=nz,
-                          restartcheck_params=restartcheck_params), )
+decks = [TestDeck(name='ThermoPoroElastic_efem-edfm_verticalFrac', 
+                  description='Thermoporoelastic case with an embeded fracture', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=10, 
+                  check_step=10,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+         TestDeck(name='ThermoPoroElastic_conforming', 
+                  description='Thermoporoelastic case with a conforming fracture', 
+                  partitions=((1, 1, 1), (2, 2, 1)), 
+                  restart_step=10, 
+                  check_step=10,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params))]
 
-            if restart > 0:
-                steps += (geos(deck=deck + ".xml",
-                               name="%dto%d" % (restart, num_steps),
-                               np=N,
-                               ngpu=N,
-                               x_partitions=nx,
-                               y_partitions=ny,
-                               z_partitions=nz,
-                               restart_file=os.path.join(testcase_name, "%s_restart_%09d" % (base_name, restart)),
-                               baseline_pattern="%s_restart_[0-9]+\.root" % base_name,
-                               allow_rebaseline=False,
-                               restartcheck_params=restartcheck_params), )
-
-            TestCase(name=testcase_name,
-                     desc=description,
-                     label="auto",
-                     owner="Francois Hamon",
-                     independent=True,
-                     steps=steps)
+generate_geos_tests(decks)

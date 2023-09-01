@@ -1,15 +1,6 @@
-
-# Check parameters
-restartcheck_params = {}
-restartcheck_params["atol"] = 2.0E-4
-restartcheck_params["rtol"] = 1.0E-7
-
-curvecheck_params_base = {}
-curvecheck_params_base["filename"] = "hydrofracture_source_curves.hdf5"
-curvecheck_params_base["tolerance"] = [1e-10, 1e-10]
-curvecheck_params_base["script_instructions"] = [["./hydrofractureCurveChecks.py", "tbd", "hydraulicAperture", "source"],
-                                                 ["./hydrofractureCurveChecks.py", "tbd", "pressure", "source"]]
-curvecheck_params_base["curves"] = [["hydraulicAperture", "source"], ["pressure", "source"]]
+import copy
+import geos_ats
+from geos_ats.test_builder import generate_geos_tests, RestartcheckParameters, CurveCheckParameters, TestDeck
 
 
 # Define cases
@@ -175,57 +166,39 @@ decks = (kgd_viscosity_dominated,
          walsh_quarter_no_chombo
          )
 
-cases = []
 
+# Check parameters
+restartcheck_params = RestartcheckParameters( atol=2.0E-4, rtol=1.0E-7 )
 
+curvecheck_params_base = {}
+curvecheck_params_base["filename"] = "hydrofracture_source_curves.hdf5"
+curvecheck_params_base["tolerance"] = [1e-10, 1e-10]
+curvecheck_params_base["script_instructions"] = [["./hydrofractureCurveChecks.py", "tbd", "hydraulicAperture", "source"],
+                                                 ["./hydrofractureCurveChecks.py", "tbd", "pressure", "source"]]
+curvecheck_params_base["curves"] = [["hydraulicAperture", "source"], ["pressure", "source"]]
+
+deck_instances = []
 for deck in decks:
-    # deck, description, partitions, restart_step, num_steps
-    for partition in deck["partitions"]:
-        nx = partition[0]
-        ny = partition[1]
-        nz = partition[2]
-        N = nx * ny * nz
-        testcase_name = "{}_{:02d}".format(deck["name"], N)
-        base_name = "0to{:d}".format(deck["check_step"])
-
+    if ("aperture_curve_method" in deck) and ("pressure_curve_method" in deck):
+        curvecheck_params = copy.deepcopy(curvecheck_params_base)
+        curvecheck_params["script_instructions"][0][1] = deck["aperture_curve_method"]
+        curvecheck_params["script_instructions"][1][1] = deck["pressure_curve_method"]
+                
+    if  ("tolerance" in deck):
+        curvecheck_params["tolerance"] = deck["tolerance"]
+        curvecheck_params = CurveCheckParameters(**curvecheck_params)
+    else:
         curvecheck_params = None
-        if ("aperture_curve_method" in deck) and ("pressure_curve_method" in deck):
-            curvecheck_params = curvecheck_params_base.copy()
-            curvecheck_params["script_instructions"][0][1] = deck["aperture_curve_method"]
-            curvecheck_params["script_instructions"][1][1] = deck["pressure_curve_method"]
 
-        if (curvecheck_params is not None) and ("tolerance" in deck):
-            curvecheck_params["tolerance"] = deck["tolerance"]
+    deck_instance = TestDeck( name=deck["name"],
+                             description= deck["description"],
+                             partitions= deck["partitions"],
+                             restart_step= deck["restart_step"],
+                             check_step= deck["check_step"],
+                             restartcheck_params=restartcheck_params,
+                             curvecheck_params=curvecheck_params )                   
 
-        steps = [geos(deck="{}.xml".format(deck["name"]),
-                      name=base_name,
-                      np=N,
-                      ngpu=N,
-                      x_partitions=nx,
-                      y_partitions=ny,
-                      z_partitions=nz,
-                      restartcheck_params=restartcheck_params,
-                      curvecheck_params=curvecheck_params)]
+    deck_instances.append(deck_instance)
 
-        if deck["restart_step"] > 0:
-            steps.append(geos(deck="{}.xml".format(deck["name"]),
-                           name="{:d}to{:d}".format(deck["restart_step"], deck["check_step"]),
-                           np=N,
-                           ngpu=N,
-                           x_partitions=nx,
-                           y_partitions=ny,
-                           z_partitions=nz,
-                           restart_file=os.path.join(testcase_name, "{}_restart_{:09d}".format(base_name, deck["restart_step"])),
-                           baseline_pattern=f"{base_name}_restart_[0-9]+\.root",
-                           allow_rebaseline=False,
-                           restartcheck_params=restartcheck_params))
 
-        tmp = TestCase(name=testcase_name,
-                 desc=deck["description"],
-                 label="auto",
-                 owner="Tao Jin, Jian Huang, Christopher Sherman",
-                 independent=True,
-                 steps=steps)
-
-        cases.append(tmp)
-
+generate_geos_tests( deck_instances )  

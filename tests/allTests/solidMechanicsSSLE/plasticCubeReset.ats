@@ -1,35 +1,18 @@
-import os
+import geos_ats 
+from geos_ats.test_builder import generate_geos_tests, RestartcheckParameters, TestDeck
 
 restartcheck_params = {}
 restartcheck_params["atol"] = 1.0E-5
 restartcheck_params["rtol"] = 1.0E-5
 
 partitions = ((1, 1, 1), (1, 1, 2))
-for nx, ny, nz in partitions:
-    N = nx * ny * nz
 
-    testcase_name = "plasticCubeReset_%02d" % N
-    TestCase(name=testcase_name,
-             desc="Test the initialization step of for solid mechanics on %d ranks." % N,
-             label="auto",
-             owner="RRS",
-             independent=True,
-             steps=(geos(deck="plasticCubeReset.xml",
-                         name="0to7",
-                         np=N,
-                         ngpu=N,
-                         x_partitions=nx,
-                         y_partitions=ny,
-                         z_partitions=nz,
-                         restartcheck_params=restartcheck_params),
-                    geos(deck="plasticCubeReset.xml",
-                         name="4to7",
-                         np=N,
-                         ngpu=N,
-                         x_partitions=nx,
-                         y_partitions=ny,
-                         z_partitions=nz,
-                         restart_file=os.path.join(testcase_name, "0to7_restart_000000001"),
-                         baseline_pattern="0to7_restart_[0-9]+\.root",
-                         allow_rebaseline=False,
-                         restartcheck_params=restartcheck_params)))
+decks = [TestDeck(name="plasticCubeReset",
+                  description= "Test the initialization step of for solid mechanics",
+                  partitions= partitions,
+                  restart_step= 4,
+                  check_step= 7,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params))]
+
+
+generate_geos_tests( decks )

@@ -1,61 +1,46 @@
+
+import os
+import geos_ats
+from geos_ats.test_builder import TestDeck, RestartcheckParameters, generate_geos_tests
 restartcheck_params = {}
-restartcheck_params["atol"] = 1.0E-8
-restartcheck_params["rtol"] = 2.0E-10
+restartcheck_params['atol'] = 1e-08
+restartcheck_params['rtol'] = 2e-10
 
-# format: (<input>, <desc>, <partition_list>, <restart_step>, <total_steps>)
-decks = (
-    ("10x10x10Hex_LaplaceFEM_smoke", "Testing the Laplace solver with Finite Elements", ((1, 1, 1), (2, 2, 2),
-                                                                                         (3, 3, 3)), 1, 2),
-    (
-        "50x10x5Hex_LaplaceFEM_smoke",
-        "Testing the Laplace solver with Finite Elements",
-        ((1, 1, 1), (2, 2, 2), (3, 3, 2)),    # not enough z layers for 27 ranks
-        1,
-        2),
-    ("10x10x10Hex_LaplaceVEM_smoke", "Testing the Laplace solver with the Virtual Element Method (hexahedral cells)",
-     ((1, 1, 1), (2, 2, 2)), 1, 2),
-    ("15x5x10Tets_LaplaceVEM_smoke", "Testing the Laplace solver with the Virtual Element Method (tetrahedral cells)",
-     ((1, 1, 1), (2, 2, 2)), 1, 2),
-    ("10x5x15Wedges_LaplaceVEM_smoke", "Testing the Laplace solver with the Virtual Element Method (wedges)",
-     ((1, 1, 1), (2, 2, 2)), 1, 2),
-    ("hybridHexPrism_LaplaceVEM_smoke",
-     "Testing the Laplace solver with the Virtual Element Method (hexahedra and prisms)", ((1, 1, 1), (3, 1, 1)), 1, 2))
+decks = [TestDeck(name='10x10x10Hex_LaplaceFEM_smoke', 
+                  description='Testing the Laplace solver with Finite Elements', 
+                  partitions=((1, 1, 1), (2, 2, 2), (3, 3, 3)), 
+                  restart_step=1, 
+                  check_step=2,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+         TestDeck(name='50x10x5Hex_LaplaceFEM_smoke', 
+                  description='Testing the Laplace solver with Finite Elements', 
+                  partitions=((1, 1, 1), (2, 2, 2), (3, 3, 2)), 
+                  restart_step=1, 
+                  check_step=2,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+         TestDeck(name='10x10x10Hex_LaplaceVEM_smoke', 
+                  description='Testing the Laplace solver with the Virtual Element Method (hexahedral cells)',
+                  partitions=((1, 1, 1), (2, 2, 2)), 
+                  restart_step=1, 
+                  check_step=2,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+         TestDeck(name='15x5x10Tets_LaplaceVEM_smoke', 
+                  description='Testing the Laplace solver with the Virtual Element Method (tetrahedral cells)', 
+                  partitions=((1, 1, 1), (2, 2, 2)), 
+                  restart_step=1, 
+                  check_step=2,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+         TestDeck(name='10x5x15Wedges_LaplaceVEM_smoke', 
+                  description='Testing the Laplace solver with the Virtual Element Method (wedges)', 
+                  partitions=((1, 1, 1), (2, 2, 2)), 
+                  restart_step=1, 
+                  check_step=2,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
+         TestDeck(name='hybridHexPrism_LaplaceVEM_smoke',
+                  description='Testing the Laplace solver with the Virtual Element Method (hexahedra and prisms)', 
+                  partitions=((1, 1, 1), (3, 1, 1)), 
+                  restart_step=1, 
+                  check_step=2,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params))]
 
-for deck, description, partitions, restart, num_steps in decks:
-    for partition in partitions:
-        nx = partition[0]
-        ny = partition[1]
-        nz = partition[2]
-        N = nx * ny * nz
-
-        testcase_name = "%s_%02d" % (deck, N)
-        base_name = "0to%d" % num_steps
-
-        steps = (geos(deck=deck + ".xml",
-                      name=base_name,
-                      np=N,
-                      ngpu=N,
-                      x_partitions=nx,
-                      y_partitions=ny,
-                      z_partitions=nz,
-                      restartcheck_params=restartcheck_params), )
-
-        if restart > 0:
-            steps += (geos(deck=deck + ".xml",
-                           name="%dto%d" % (restart, num_steps),
-                           np=N,
-                           ngpu=N,
-                           x_partitions=nx,
-                           y_partitions=ny,
-                           z_partitions=nz,
-                           restart_file=os.path.join(testcase_name, "%s_restart_%09d" % (base_name, restart)),
-                           baseline_pattern="%s_restart_[0-9]+\.root" % base_name,
-                           allow_rebaseline=False,
-                           restartcheck_params=restartcheck_params), )
-
-        TestCase(name=testcase_name,
-                 desc=description,
-                 label="auto",
-                 owner="Andrea Borio",
-                 independent=True,
-                 steps=steps)
+generate_geos_tests(decks)

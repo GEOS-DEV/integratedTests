@@ -25,6 +25,7 @@ check_options = {
     "stopcheck": "check the stop time and stop cycle",
     "curvecheck": "check the ultra curves",
     "restartcheck": "check the restart file",
+    "performancecheck": "check nonlinear and linear solvers performance"
 }
 
 verbose_options = {

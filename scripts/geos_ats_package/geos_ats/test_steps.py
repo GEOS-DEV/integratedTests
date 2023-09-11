@@ -13,6 +13,7 @@ from geos_ats.configuration_record import config
 
 logger = logging.getLogger('geos_ats')
 
+EXTRACTED_PERFORMANCECHECK_DATAFILE = 'extracted_performance_data.h5'
 
 def getGeosProblemName(deck, name):
     """
@@ -397,12 +398,13 @@ class geos(TestStepBase):
 
     checkstepnames = ["restartcheck"]
 
-    def __init__(self, restartcheck_params=None, curvecheck_params=None, **kw):
+    def __init__(self, restartcheck_params=None, curvecheck_params=None, performancecheck_params=None, **kw):
         """
         Initializes the parameters of this test step, and creates the appropriate check steps.
 
         RESTARTCHECK_PARAMS [in]: Dictionary that gets passed on to the restartcheck step.
         CURVECHECK_PARAMS [in]: Dictionary that gets passed on to the curvecheck step.
+        PERFORMANCE_PARAMS [in]: Dictionary that gets passed on to the performancecheck step.
         KEYWORDS [in]: Dictionary that is used to set the parameters of this step and also all check steps.
         """
 
@@ -418,6 +420,10 @@ class geos(TestStepBase):
         if checkOption in ["all", "restartcheck"]:
             if restartcheck_params is not None:
                 self.checksteps.append(restartcheck(restartcheck_params, **kw))
+
+        if checkOption in ["all", "perfomrancecheck"]:
+            if performancecheck_params is not None:
+                self.checksteps.append(performancecheck(performancecheck_params, **kw))        
 
     def label(self):
         return "geos"
@@ -763,6 +769,108 @@ class curvecheck(CheckTestStepBase):
     def clean(self):
         self._clean(self.resultPaths())
 
+class performancecheck(CheckTestStepBase):
+    """
+    Class for the performance check test step.
+    """
+
+    doc = """CheckTestStep to compare a curve file against a baseline."""
+
+    command = """performance_check.py filename baseline"""
+
+    params = TestStepBase.defaultParams + CheckTestStepBase.checkParams + (
+        TestStepBase.commonParams["deck"], TestStepBase.commonParams["name"], TestStepBase.commonParams["np"],
+        TestStepBase.commonParams["allow_rebaseline"], TestStepBase.commonParams["baseline_dir"],
+        TestStepBase.commonParams["output_directory"],
+        TestParam("tolerance", "tolerances for newton and linear iterations"),
+        TestParam("filename", "Name of  GEOS.") )
+
+    def __init__(self, permormancecheck_params, **kw):
+        """
+        Set parameters with PERFORMANCECHECK_PARAMS and then with KEYWORDS.
+        """
+        CheckTestStepBase.__init__(self)
+        self.p.warnings_are_errors = True
+
+        if permormancecheck_params is not None:
+            c = permormancecheck_params.copy()
+
+            # Check whether tolerance was specified as a single float, list
+            # and then convert into a comma-delimited string
+            tol = c.get('tolerance', 0.0)
+            if isinstance(tol, (float, int)):
+                tol = [tol] * 2
+            c['tolerance'] = ','.join([str(x) for x in tol])
+
+            self.setParams(c, self.params)
+        self.setParams(kw, self.params)
+
+    def label(self):
+        return "performancecheck"    
+
+    def makeArgs(self):
+        cur_dir = os.path.dirname(os.path.realpath(__file__))
+        script_location = os.path.join(cur_dir, "helpers", "performance_check.py")
+        args = [script_location]
+
+        if self.p.tolerance is not None:
+            for t in self.p.tolerance.split(','):
+                args += ["-t", t]
+        if self.p.warnings_are_errors:
+            args += ["-w"]
+
+        args += ['-o', self.figure_root]
+        args += [self.target_file, self.baseline_file]
+        return list(map(str, args))
+
+    def executable(self):
+        if self.getTestMode():
+            return "python"
+        else:
+            return sys.executable        
+
+    def rebaseline(self):
+        if not self.p.allow_rebaseline:
+            Log("Rebaseline not allowed for performancecheck of %s." % self.p.name)
+            return
+        
+        baseline_dir = os.path.split(self.baseline_file)[0]
+        os.makedirs(baseline_dir, exist_ok=True)
+        file = os.path.join(self.p.output_directory, EXTRACTED_PERFORMANCECHECK_DATAFILE)
+        shutil.copyfile(file, self.baseline_file)
+
+    def update(self, dictionary):
+        self.setParams(dictionary, self.params)
+        self.handleCommonParams()
+
+        self.requireParam("deck")
+        self.requireParam("baseline_dir")
+        self.requireParam("output_directory")
+
+        self.baseline_file = os.path.join(self.p.baseline_dir, EXTRACTED_PERFORMANCECHECK_DATAFILE)
+        output_directory = self.p.output_directory
+
+        # Search for all files with a .data extension within the output_directory
+        data_files = glob.glob(os.path.join(output_directory, "*.data"))
+        if len(data_files) == 1:
+            self.target_file = data_files[0]
+        elif len(data_files) > 1:
+            raise Exception(f'More than 1 .data file was found')
+        else:
+            raise Exception(f'No .data file was found in {output_directory}')
+
+        self.figure_root = os.path.join(self.p.output_directory, 'performance_check')
+
+        if self.p.allow_rebaseline is None:
+            self.p.allow_rebaseline = True
+
+    def resultPaths(self):
+        figure_pattern = os.path.join(self.figure_root, '*.png')
+        figure_list = sorted(glob.glob(figure_pattern))
+        return [self.target_file] + figure_list
+
+    def clean(self):
+        self._clean(self.resultPaths())                
 
 def infoTestStepParams(params, maxwidth=None):
     if maxwidth is None:

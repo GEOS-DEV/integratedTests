@@ -816,9 +816,7 @@ class performancecheck(CheckTestStepBase):
         if self.p.tolerance is not None:
             for t in self.p.tolerance.split(','):
                 args += ["-t", t]
-        if self.p.warnings_are_errors:
-            args += ["-w"]
-
+                
         args += ['-o', self.figure_root]
         args += [self.target_file, self.baseline_file]
         return list(map(str, args))

@@ -61,7 +61,7 @@ def parse_log_file( fname ):
                 config_iter_data['NewtonIters'][newton_iter] = num_iterations
 
     # Create an HDF5 file for storing the data
-    output_fileName = 'extracted_performance_data.h5'
+    output_fileName = os.path.join(os.path.dirname(fname), 'extracted_performance_data.h5')
     with h5py.File(output_fileName, 'w') as hdf5_file:
         for cycle, cycle_data in data.items():
             cycle_group = hdf5_file.create_group(f'Cycle_{cycle}')
@@ -84,7 +84,7 @@ def parse_log_file( fname ):
 
     return output_fileName, errors        
 
-def load_data(fname, errors):
+def load_data(fname):
     """
     Args: 
         fname (str):
@@ -97,14 +97,12 @@ def load_data(fname, errors):
     if os.path.isfile(fname):
         data = hdf5_wrapper.hdf5_wrapper(fname).get_copy()
     else:
-        errors.append(f'File {fname} not found.')
-
-    return data, errors
+       raise Exception(f'file {fname} not found. If baselines do not exist you may simply need to rebaseline this case.')
+    return data
 
 # def plot_performance_curves():
 #     """
 #     """
-    
 
 def compare_performance_curves( fname, baseline, tolerances, output ):
     """
@@ -125,8 +123,8 @@ def compare_performance_curves( fname, baseline, tolerances, output ):
     newton_iterations_tolerance, linear_iterations_tolerance = tolerances
 
     # Load data
-    target_data, errors  = load_data(fname, errors)
-    baseline_data, errors = load_data(baseline, errors)
+    target_data   = load_data( fname )
+    baseline_data = load_data( baseline )
 
     # Check if the number of cycles is the same
     target_cycles   = set(target_data.keys())
@@ -177,11 +175,12 @@ def performance_check_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("filename", help="Path to the log file")
     parser.add_argument("baseline", help="Path to the baseline file")
-
     parser.add_argument("-t",
                         "--tolerance",
-                        help="The tolerances for nonlinear and linear iterations",
-                        default=[0.1, 0.2])
+                        nargs='+',
+                        action='append',
+                        help=f"The tolerance for nonlinear and linear iterations",
+                        default=[])
     parser.add_argument("-o",
                         "--output",
                         help="Output figures to this directory",

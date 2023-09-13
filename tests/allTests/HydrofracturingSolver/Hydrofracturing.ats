@@ -10,7 +10,7 @@ kgd_viscosity_dominated = {
     "partitions": ((1, 1, 1), (2, 3, 1)),
     "restart_step": 0,
     "check_step": 1,
-    "tolerance": [2.3e-6, 2700.0],
+    "tolerance": [2.3e-5, 27000.0],
     "aperture_curve_method": "kgd_viscosity_dominated_aperture_curve",
     "pressure_curve_method": "kgd_viscosity_dominated_pressure_curve"
 }

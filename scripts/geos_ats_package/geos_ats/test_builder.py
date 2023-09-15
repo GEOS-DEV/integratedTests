@@ -7,7 +7,7 @@ from .test_steps import geos
 from .test_case import TestCase
 
 
-@dataclass(frozen=True)    
+@dataclass(frozen=True)
 class RestartcheckParameters:
     atol: float
     rtol: float
@@ -15,17 +15,19 @@ class RestartcheckParameters:
     def as_dict(self):
         return asdict(self)
 
+
 @dataclass(frozen=True)
 class CurveCheckParameters:
     filename: str
     tolerance: Iterable[float]
     curves: list[list[str]]
-    script_instructions: Iterable[Iterable[str]]=None
+    script_instructions: Iterable[Iterable[str]] = None
     time_units: str = "seconds"
 
     def as_dict(self):
         return asdict(self)
-    
+
+
 @dataclass(frozen=True)
 class TestDeck:
     name: str
@@ -71,16 +73,16 @@ def collect_block_names(fname):
     os.chdir(pwd)
 
 
-def generate_geos_tests( decks: Iterable[TestDeck] ):
+def generate_geos_tests(decks: Iterable[TestDeck]):
     """
     """
     for ii, deck in enumerate(decks):
 
-        restartcheck_params=None
-        curvecheck_params=None
+        restartcheck_params = None
+        curvecheck_params = None
 
         if deck.restartcheck_params is not None:
-            restartcheck_params= deck.restartcheck_params.as_dict()
+            restartcheck_params = deck.restartcheck_params.as_dict()
 
         if deck.curvecheck_params is not None:
             curvecheck_params = deck.curvecheck_params.as_dict()
@@ -98,29 +100,33 @@ def generate_geos_tests( decks: Iterable[TestDeck] ):
             if curvecheck_params:
                 checks.append('curve')
 
-            steps = [ geos(deck=xml_file,
-                        name=base_name,
-                        np=N,
-                        ngpu=N,
-                        x_partitions=nx,
-                        y_partitions=ny,
-                        z_partitions=nz,
-                        restartcheck_params=restartcheck_params,
-                        curvecheck_params=curvecheck_params) ]
+            steps = [
+                geos(deck=xml_file,
+                     name=base_name,
+                     np=N,
+                     ngpu=N,
+                     x_partitions=nx,
+                     y_partitions=ny,
+                     z_partitions=nz,
+                     restartcheck_params=restartcheck_params,
+                     curvecheck_params=curvecheck_params)
+            ]
 
             if deck.restart_step > 0:
-                checks.append('restart')                
-                steps.append(geos(deck=xml_file,
-                            name="{:d}to{:d}".format(deck.restart_step, deck.check_step),
-                            np=N,
-                            ngpu=N,
-                            x_partitions=nx,
-                            y_partitions=ny,
-                            z_partitions=nz,
-                            restart_file=os.path.join(testcase_name, "{}_restart_{:09d}".format(base_name, deck.restart_step) ),
-                            baseline_pattern=f"{base_name}_restart_[0-9]+\.root",
-                            allow_rebaseline=False,
-                            restartcheck_params=restartcheck_params) )
+                checks.append('restart')
+                steps.append(
+                    geos(deck=xml_file,
+                         name="{:d}to{:d}".format(deck.restart_step, deck.check_step),
+                         np=N,
+                         ngpu=N,
+                         x_partitions=nx,
+                         y_partitions=ny,
+                         z_partitions=nz,
+                         restart_file=os.path.join(testcase_name,
+                                                   "{}_restart_{:09d}".format(base_name, deck.restart_step)),
+                         baseline_pattern=f"{base_name}_restart_[0-9]+\.root",
+                         allow_rebaseline=False,
+                         restartcheck_params=restartcheck_params))
 
             AtsTest.stick(level=ii)
             AtsTest.stick(checks=','.join(checks))
@@ -133,7 +139,3 @@ def generate_geos_tests( decks: Iterable[TestDeck] ):
                      owner="GEOS team",
                      independent=True,
                      steps=steps)
-        
-    
-
-              

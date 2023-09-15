@@ -656,8 +656,10 @@ class curvecheck(CheckTestStepBase):
         TestStepBase.commonParams["output_directory"],
         TestParam("filename", "Name of the target curve file written by GEOS."),
         TestParam("curves", "A list of parameter, setname value pairs."),
-        TestParam("tolerance", "Curve check tolerance (||x-y||/N), can be specified as a single value or a list of floats corresponding to the curves."),
-        TestParam("warnings_are_errors", "Treat warnings as errors, default is True."),
+        TestParam(
+            "tolerance",
+            "Curve check tolerance (||x-y||/N), can be specified as a single value or a list of floats corresponding to the curves."
+        ), TestParam("warnings_are_errors", "Treat warnings as errors, default is True."),
         TestParam("script_instructions", "A list of (path, function, value, setname) entries"),
         TestParam("time_units", "Time units to use for plots."))
 
@@ -727,7 +729,7 @@ class curvecheck(CheckTestStepBase):
         if self.p.curves is not None:
             for c in self.p.curves.split(';'):
                 args += ["-c"]
-                args +=  c.split(',') 
+                args += c.split(',')
         if self.p.tolerance is not None:
             for t in self.p.tolerance.split(','):
                 args += ["-t", t]
@@ -748,7 +750,7 @@ class curvecheck(CheckTestStepBase):
         if not self.p.allow_rebaseline:
             Log("Rebaseline not allowed for curvecheck of %s." % self.p.name)
             return
-        
+
         baseline_dir = os.path.split(self.baseline_file)[0]
         os.makedirs(baseline_dir, exist_ok=True)
         shutil.copyfile(self.target_file, self.baseline_file)

@@ -30,7 +30,7 @@ def setup_ats(build_path, ats_xargs, ats_machine, ats_machine_dir):
     # Write the bash script to run ats.
     with open(run_script_fname, "w") as g:
         g.write("#!/bin/bash\n")
-        g.write(f"{geos_ats_fname} {bin_dir} --workingDir {ats_dir} --logs {log_dir} {ats_args} $ATS_ARGS \"$@\"\n")
+        g.write(f"{geos_ats_fname} {bin_dir} --workingDir {ats_dir} --logs {log_dir} {ats_args} \"$@\"\n")
 
     # Make the script executable
     st = os.stat(run_script_fname)

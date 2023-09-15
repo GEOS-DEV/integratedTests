@@ -55,7 +55,8 @@ def collect_block_names(fname):
 
     # Collect the block names in this file
     results = {}
-    tree = etree.parse(actual_fname)
+    parser = etree.XMLParser(remove_comments=True)
+    tree = etree.parse(actual_fname, parser=parser)
     root = tree.getroot()
     for child in root.getchildren():
         results[child.tag] = [grandchild.tag for grandchild in child.getchildren()]
@@ -71,6 +72,7 @@ def collect_block_names(fname):
                 else:
                     results[k] = v
     os.chdir(pwd)
+    return results
 
 
 def generate_geos_tests(decks: Iterable[TestDeck]):

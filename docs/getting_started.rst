@@ -63,6 +63,9 @@ In most cases, integrated tests processes can be triggered in the GEOS build dir
 * `make ats_rebaseline_failed` : Automatically update the baseline files for any failed tests.
 
 
+.. note::
+  The `make_ats_environment` step will attempt to collect python packages github and pypi, so it should be run from a machine with internet access.
+
 
 .. note::
   Running the integrated tests requires significant computational resources.
@@ -91,6 +94,58 @@ Common options for this script include:
 * --machine : Set the ats machine type name.
 * --ats : Pass an argument to the underlying ats framework.  Running `geos_ats.sh --ats help` will show you a list of available options for your current machine.
 
+
+Machine Definitions
+------------------------
+
+On many machines, ATS will automatically identify your machine's configuration and optimize it's performance.
+If the tests fail to run or to properly leverage your machine's resources, you may need to manually configure the machine.
+If you know the appropriate name for your machine in ATS (or the geos_ats package), then you can run `./geos_ats.sh --machine machine_name --ats help` to see a list of potential configuration options.
+
+The `openmpi` machine is a common option for non-LC systems.
+For a system with 32 cores/node, an appropriate run command might look like:
+
+.. code-block:: sh
+
+  ./geos_ats.sh --machine openmpi --ats openmpi_numnodes 32 --ats openmpi_args=--report-bindings --ats openmpi_args="--bind-to none" --ats openmpi_install "/path/to/openmpi/installation"
+
+
+.. note::
+  In this example, the path given by `openmpi_install` should include `bin/mpirun`. 
+
+
+.. note::
+  When you have identified a set of arguments that work for your machine, we recommend recording in the `ATS_ARGUMENTS` cmake variable in your system host config file.
+
+
+Test Filtering
+------------------------
+
+An arbitrary number of filter arguments can be supplied to ATS to limit the number of tests to be run.
+Filter arguments should refer to an ATS test variable and use a python-syntax (e.g.: "'some_string' in ats_variable" or "ats_variable<10").
+These can be set via command-line arguments (possible via the `ATS_ARGUMENTS` variable):
+
+.. code-block:: sh
+
+  ./geos_ats.sh --ats f "np==1" --ats f "'SinglePhaseFVM' in solvers"
+
+
+or via an environment variable (`ATS_FILTER`):
+
+.. code-block:: sh
+
+  export ATS_FILTER="np==1,'SinglePhaseFVM' in solvers"
+
+
+Common ATS variables that you can filter tests include:
+
+* np : The number of parallel processes for the test
+* label : The name of the test case (e.g.: "sedov_01")
+* collection : The name of the parent test folder (e.g.: "contactMechanics")
+* checks : A comma-separated list of checks (e.g.: "curve,restart")
+* solvers : A comma-separated list of solver types (e.g.: "SinglePhaseFVM,SurfaceGenerator")
+* outputs : A comma-separated list of output types (e.g.: "Restart,VTK")
+* constitutive_models : A comma-separated list of constitutive model types (e.g.: "CompressibleSinglePhaseFluid,ElasticIsotropic")
 
 
 Inspecting Test Results

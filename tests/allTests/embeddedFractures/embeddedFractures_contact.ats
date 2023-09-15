@@ -3,6 +3,9 @@ import os
 import geos_ats
 from geos_ats.test_builder import TestDeck, RestartcheckParameters, generate_geos_tests
 
+stick(solver='M')
+stick(collection='embeddedFractures')
+
 restartcheck_params = {'atol': 1e-06, 'rtol': 4e-07}
 
 decks = [TestDeck(name='EmbFrac_Compression_Frictionless',

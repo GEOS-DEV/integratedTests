@@ -24,7 +24,6 @@ class OpenmpiMachine(machines.Machine):
         "Examine options from command line, possibly override command line choices."
         super(OpenmpiMachine, self).examineOptions(options)
         # openmpi_numnodes is actually number of jobs
-        self.maxtests = options.openmpi_numnodes
         self.precommand = options.openmpi_precommand
         self.terminate = options.openmpi_terminate
         self.install = options.openmpi_install
@@ -47,6 +46,7 @@ class OpenmpiMachine(machines.Machine):
         # Copy options for geos_ats config
         self.openmpi_numnodes = options.openmpi_numnodes
         self.openmpi_maxprocs = options.openmpi_maxprocs
+        self.maxtests = options.openmpi_maxprocs
         self.openmpi_procspernode = options.openmpi_procspernode
         self.openmpi_precommand = options.openmpi_precommand
         self.openmpi_terminate = options.openmpi_terminate

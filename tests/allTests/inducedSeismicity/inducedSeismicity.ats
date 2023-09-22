@@ -1,0 +1,16 @@
+
+import os
+import geos_ats
+from geos_ats.test_builder import TestDeck, RestartcheckParameters, generate_geos_tests
+restartcheck_params = {}
+restartcheck_params['atol'] = 1e-08
+restartcheck_params['rtol'] = 2e-10
+
+decks = [TestDeck(name='PoroElasticSource', 
+                  description='Testing the seismicity rate solver for a poroelastic medium with pressure source at the center', 
+                  partitions=((1, 1, 1), (2, 2, 2), (3, 3, 3)), 
+                  restart_step=5, 
+                  check_step=10,
+                  restartcheck_params=RestartcheckParameters(**restartcheck_params))]
+
+generate_geos_tests(decks)

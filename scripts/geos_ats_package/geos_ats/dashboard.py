@@ -12,6 +12,25 @@ import pandas as pd
 from collections import Counter
 
 
+test_status_colors = {
+    'FILTERED': 'grey',
+    'NOT BUILT': 'grey',
+    'NOT RUN': 'blue',
+    'BATCHED': 'brown',
+    'INPROGRESS': 'cyan',
+    'PASSED': 'green',
+    'EXPECTEDFAIL': 'green',
+    'TIMEOUT': 'yellow',
+    'SKIPPED': 'orange',
+    'FAIL RUN': 'magenta',
+    'UNEXPECTEDPASS': 'red',
+    'FAIL RUN (OPTIONAL STEP)': 'pink',
+    'FAIL CHECK': 'red',
+    'FAIL CHECK (MINOR)': 'pink',
+}
+
+
+
 def parse_ats_txt_report(fname):
     if not os.path.isfile(fname):
         return {'TestCase': ['ATS'],
@@ -25,35 +44,17 @@ def parse_ats_txt_report(fname):
     line_break = False
     with open(fname, 'r') as f:
         for line in f:
-            # print(report_section, line)
-
             if (report_section == 0):
                 if 'Status' in line:
                     report_section += 1
                     report_header = [x.strip() for x in line.split(' : ')]
-
-            elif (report_section == 1):
-                report_section += 1
-
-            elif (report_section == 2):
-                if '----------' in line:
-                    report_section += 1
-
+            else:
+                if '--' in line:
+                    continue
                 else:
                     tmp = [x.strip() for x in line.split(' : ')]
-
-                    if tmp[-1] and tmp[-1][-1] == '-':
-                        tmp[-1] = tmp[-1][:-1]
-                        line_break = True
-                    else:
-                        line_break = False
-
                     if tmp[0]:
                         report_table.append(tmp)
-                    else:
-                        if not line_break:
-                            report_table[-1][-1] += ','
-                        report_table[-1][-1] += tmp[-1]
 
     # Fallback in case file parsing failed
     if not report_header:
@@ -309,51 +310,44 @@ class GEOSTestingDashboard():
         return tabs
 
     def build_test_overview_page(self):
-        table_container = dbc.Container([
-            dbc.Label('Click a cell in the table:'),
-            dash_table.DataTable(id='overview_table',
-                style_header={"fontWeight": "bold", "color": "inherit"},
-                style_as_list_view=True,
-                fill_width=True,
-                page_size=1000,
-                fixed_rows={'headers': True},
-                sort_action='native',
-                filter_action='native',
-                style_cell_conditional=[
-                    {"if": {"column_id": "Name"}, "textAlign": "left"}
-                ],
-                style_cell={
-                    "backgroundColor": "#1e2130",
-                    "fontFamily": "Open Sans",
-                    "padding": "0 2rem",
-                    "color": "darkgray",
-                    "border": "none",
-                },
-                css=[
-                    {"selector": "tr:hover td", "rule": "color: #91dfd2 !important;"},
-                    {"selector": "td", "rule": "border: none !important;"},
-                    {
-                        "selector": ".dash-cell.focused",
-                        "rule": "background-color: #1e2130 !important;",
-                    },
-                    {"selector": "table", "rule": "--accent: #1e2130;"},
-                    {"selector": "tr", "rule": "background-color: transparent"},
-                ]),
-            dbc.Alert(id='overview_table_status'),
-        ])
+        table = dash_table.DataTable(
+            id='overview_table',
+            page_action='none',
+            sort_action='native',
+            style_table={
+                'height': '300px',
+                # 'width': '90vw',
+                'overflowY': 'auto'
+            },
+            style_cell={
+                'backgroundColor': '#1e2130',
+                'minWidth': 95,
+                'maxWidth': 95,
+                'width': 95,
+                'height': 'auto',
+                'whiteSpace': 'normal'
+            },
+            style_header={
+                'backgroundColor': '#242633',
+                'minWidth': 95,
+                'maxWidth': 95,
+                'width': 95,
+                'fontWeight': 'bold'
+            })
+        table_div = html.Div(table, style={'border': '1px solid'})
 
-        status_pie_chart = dcc.Graph(id='status_pie_chart')
+        status_pie_chart = dcc.Graph(id='status_pie_chart', figure=self.build_dummy_figure())
         test_details = self.build_test_detail_group()
-        div = html.Div(
+        overview_div = html.Div(
             id=f'test_overview',
-            children=[status_pie_chart, table_container, test_details],
+            children=[status_pie_chart, table_div, test_details],
             className="figure-page",
         )
 
         page = dcc.Tab(id=f"STRIVE-tab-configuration",
                        label="Overview",
                        value='overview',
-                       children=div,
+                       children=overview_div,
                        className="custom-tab",
                        selected_className="custom-tab--selected")
 
@@ -410,22 +404,22 @@ class GEOSTestingDashboard():
         axis_def = {
             'mirror': True,
             'ticks': 'outside',
-            'showline': True,
+            'showline': False,
             'zeroline': False,
             'showgrid': False,
-            'tickcolor': 'white'
+            'tickcolor': 'rgba(0,0,0,0)'
         }
-        fig.update_layout(xaxis_title="X",
-                          yaxis_title="Y",
+        fig.update_layout(xaxis_title="",
+                          yaxis_title="",
                           clickmode='event+select',
                           showlegend=True,
                           margin=dict(l=20, r=20, t=10, b=90),
                           paper_bgcolor="rgba(0,0,0,0)",
                           plot_bgcolor="rgba(0,0,0,0)",
-                          font_color="white",
-                          title_font_color="white",
-                          xaxis_title_font_color="white",
-                          yaxis_title_font_color="white",
+                          font_color="rgba(0,0,0,0)",
+                          title_font_color="rgba(0,0,0,0)",
+                          xaxis_title_font_color="rgba(0,0,0,0)",
+                          yaxis_title_font_color="rgba(0,0,0,0)",
                           autosize=True,
                           xaxis=axis_def,
                           yaxis=axis_def)
@@ -448,7 +442,7 @@ class GEOSTestingDashboard():
             html.Div(children=['Status:', curve_status_str], className="widget"),
             dcc.Graph(id='curve_figure', figure=self.build_dummy_figure()),
             ]
-        curve_div = self.add_collapsible_div('Curve Check', curve_items)
+        curve_div = html.Div(self.add_collapsible_div('Curve Check', curve_items), id='curve_check_visibility')
 
         # Restart check group
         restart_absolute_tolerance_str = html.Div('0.0', id='restart-absolute-tolerance-str')
@@ -467,7 +461,7 @@ class GEOSTestingDashboard():
             html.Div('Restart Check Log'),
             restart_log,
             ])
-        restart_div = self.add_collapsible_div('Restart Check', restart_items)
+        restart_div = html.Div(self.add_collapsible_div('Restart Check', restart_items), id='restart_check_visibility')
 
         # Run log group
         run_log = dcc.Textarea(
@@ -479,7 +473,7 @@ class GEOSTestingDashboard():
         run_err = dcc.Textarea(
             id='run-err',
             value='Textarea content initialized\nwith multiple lines of text',
-            style={'width': '100%', 'height': 300, 'background-color': 'black', 'color': 'white'},
+            style={'width': '100%', 'height': 400, 'background-color': 'black', 'color': 'white'},
             readOnly=True,
         )
         run_items = html.Div([
@@ -491,36 +485,60 @@ class GEOSTestingDashboard():
         run_div = self.add_collapsible_div('Logs', run_items)
 
         # Test details callback
-        inputs = [Input('overview_table', 'active_cell')]
+        inputs = [
+            Input('overview_table', 'active_cell'),
+            State("overview_table", "data")
+        ]
         outputs = [
             Output('test-detail-banner', 'children'),
-            Output('overview_table_status', 'children'),
+            Output('curve_check_visibility', 'hidden'),
             Output('curve-select-dropdown', 'options'),
             Output('curve-select-dropdown', 'value'),
             Output('current-test-name', 'data'),
+            Output('restart_check_visibility', 'hidden'),
             Output('restart-absolute-tolerance-str', 'children'),
             Output('restart-relative-tolerance-str', 'children'),
-            Output('restart-status-str', 'children'),
             Output('restart-log', 'value'),
             Output('run-log', 'value'),
             Output('run-err', 'value')]
         @self.app.callback(outputs, inputs)
-        def render_test_details(active_cell):
+        def render_test_details(active_cell, table_data):
             if not active_cell:
-                return ["Test: None", "Click the table", no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update]
+                results = [
+                    "Test: None Selected",
+                    True,
+                    no_update,
+                    no_update,
+                    no_update,
+                    True,
+                    no_update,
+                    no_update,
+                    no_update,
+                    no_update,
+                    no_update
+                ]
+                return results
 
+            row_number = active_cell.get('row', 0)
             test_id = active_cell.get('row_id', 'None')
+            test_details = table_data[row_number]
+            test_status = test_details['Status']
+            test_color = test_status_colors[test_status]
+            status_text = html.Div(f'Test: {test_id}, Status: {test_status}', style={'color': test_color})
             dropdown_values = ['option_a', 'option_b', 'option_c']
-            
+
+            has_curve_check = True
+            has_restart_check = True
+
             results = [
-                f'Test: {test_id}',
-                str(active_cell),
+                status_text,
+                not has_curve_check,
                 dropdown_values,
                 dropdown_values[0],
                 test_id,
+                not has_restart_check,
                 str(np.random.randn()),
                 str(np.random.randn()),
-                html.Div('Passed', style={'color': 'green'}),
                 'The restart check log',
                 'The run log',
                 'The run errors',

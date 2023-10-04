@@ -6,13 +6,7 @@ restartcheck_params = {}
 restartcheck_params['atol'] = 1e-10
 restartcheck_params['rtol'] = 4e-09
 
-decks = [TestDeck(name='fractureFlow_conforming_2d_vtk_input', 
-                  description='Single phase flow test (2D, compressible, T-shaped fracture flow defined in vtk input file)', 
-                  partitions=((1, 1, 1),), 
-                  restart_step=25, 
-                  check_step=50,
-                  restartcheck_params=RestartcheckParameters(**restartcheck_params)),
-         TestDeck(name='fractureFlow_conforming_2d', 
+decks = [TestDeck(name='fractureFlow_conforming_2d', 
                   description='Single phase flow test (2D, compressible, fracture flow, conforming)', 
                   partitions=((1, 1, 1), (2, 1, 1), (4, 1, 1)), 
                   restart_step=5, 

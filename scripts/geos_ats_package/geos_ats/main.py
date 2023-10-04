@@ -81,6 +81,10 @@ def build_ats_arguments(options, ats_files, originalargv, config):
         else:
             x[0] = '--' + x[0]
         atsargv.extend(x)
+
+    for f in os.environ.get('ATS_FILTER', '').split(','):
+        atsargv.extend(['-f', f])
+
     atsargv.extend(ats_files)
     sys.argv = atsargv
 

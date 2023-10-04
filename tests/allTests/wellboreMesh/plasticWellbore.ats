@@ -6,23 +6,25 @@ restartcheck_params = {}
 restartcheck_params['atol'] = 1e-06
 restartcheck_params['rtol'] = 0.0001
 
-decks = [TestDeck(name='ModifiedCamClay_Wellbore', 
-                  description='test of wellbore mesh generation and simple loading', 
-                  partitions=((1, 1, 1), (2, 2, 1)), 
-                  restart_step=1, 
-                  check_step=1,
-                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
-         TestDeck(name='ExtendedDruckerPrager_Wellbore', 
-                  description='test of wellbore with ExtendedDruckerPrager material and simple loading', 
-                  partitions=((1, 1, 1), (2, 2, 1)), 
-                  restart_step=1, 
-                  check_step=1,
-                  restartcheck_params=RestartcheckParameters(**restartcheck_params)), 
-         TestDeck(name='DruckerPrager_Wellbore', 
-                  description='test of wellbore with DruckerPrager material and simple loading', 
-                  partitions=((1, 1, 1), (2, 2, 1)), 
-                  restart_step=1, 
-                  check_step=1,
-                  restartcheck_params=RestartcheckParameters(**restartcheck_params))]
+decks = [
+    TestDeck(name='ModifiedCamClay_Wellbore',
+             description='test of wellbore mesh generation and simple loading',
+             partitions=((1, 1, 1), (2, 2, 1)),
+             restart_step=1,
+             check_step=1,
+             restartcheck_params=RestartcheckParameters(**restartcheck_params)),
+    TestDeck(name='ExtendedDruckerPrager_Wellbore',
+             description='test of wellbore with ExtendedDruckerPrager material and simple loading',
+             partitions=((1, 1, 1), (2, 2, 1)),
+             restart_step=1,
+             check_step=1,
+             restartcheck_params=RestartcheckParameters(**restartcheck_params)),
+    TestDeck(name='DruckerPrager_Wellbore',
+             description='test of wellbore with DruckerPrager material and simple loading',
+             partitions=((1, 1, 1), (2, 2, 1)),
+             restart_step=1,
+             check_step=1,
+             restartcheck_params=RestartcheckParameters(**restartcheck_params))
+]
 
 generate_geos_tests(decks)

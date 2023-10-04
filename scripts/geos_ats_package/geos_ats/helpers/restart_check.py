@@ -254,7 +254,7 @@ class FileComparison(object):
         # Get the indices of the max absolute and relative error
         max_absolute_index = np.unravel_index(np.argmax(difference), difference.shape)
 
-        relative_difference = difference / abs_base_arr
+        relative_difference = difference / (abs_base_arr + 1e-20)
 
         # If the absolute tolerance is not zero, replace all nan's with zero.
         if self.atol != 0:

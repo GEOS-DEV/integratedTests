@@ -5,7 +5,7 @@ restartcheck_params = {}
 restartcheck_params["atol"] = 1.0E-5
 restartcheck_params["rtol"] = 1.0E-5
 
-partitions = ((1, 1, 1), (1, 1, 2))
+partitions = ((1, 1, 1), (2, 2, 1))
 
 decks = [
     TestDeck(name="elasticHollowCylinder_isotropic_smoke",

@@ -6,7 +6,7 @@ if ( Python3_EXECUTABLE )
         )
 
      add_custom_command( OUTPUT ${ATS_SCRIPT}
-                         COMMAND ${CMAKE_BINARY_DIR}/bin/setup_ats_environment ${CMAKE_BINARY_DIR} ${ATS_ARGUMENTS}
+                         COMMAND ${CMAKE_BINARY_DIR}/bin/setup_ats_environment ${CMAKE_SOURCE_DIR}/.. ${CMAKE_BINARY_DIR} ${ATS_ARGUMENTS}
                          WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                        )
 

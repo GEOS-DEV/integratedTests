@@ -29,7 +29,7 @@ class CurveCheckParameters:
 
 
 @dataclass(frozen=True)
-class PerformancecheckParameters:
+class SolverstatisticscheckParameters:
     tolerance: tuple[float, float]
 
     def as_dict(self):
@@ -44,7 +44,7 @@ class TestDeck:
     check_step: int
     restartcheck_params: RestartcheckParameters = None
     curvecheck_params: CurveCheckParameters = None
-    performancecheck_params: PerformancecheckParameters= None
+    performancecheck_params: SolverstatisticscheckParameters= None
 
 
 def collect_block_names(fname):

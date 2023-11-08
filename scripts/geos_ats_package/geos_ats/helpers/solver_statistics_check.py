@@ -61,7 +61,7 @@ def parse_log_file( fname ):
                 config_iter_data['NewtonIters'][newton_iter] = num_iterations
 
     # Create an HDF5 file for storing the data
-    output_fileName = os.path.join(os.path.dirname(fname), 'extracted_performance_data.h5')
+    output_fileName = os.path.join(os.path.dirname(fname), 'extracted_solverStat_data.h5')
     with h5py.File(output_fileName, 'w') as hdf5_file:
         for cycle, cycle_data in data.items():
             cycle_group = hdf5_file.create_group(f'Cycle_{cycle}')
@@ -165,7 +165,7 @@ def compare_performance_curves( fname, baseline, tolerances, output ):
 
     return warnings, errors
 
-def performance_check_parser():
+def solver_statistics_check_parser():
     """
     Build the curve check parser
 
@@ -184,7 +184,7 @@ def performance_check_parser():
     parser.add_argument("-o",
                         "--output",
                         help="Output figures to this directory",
-                        default='./performance_check_figures')
+                        default='./solver_statistics_check_figures')
     return parser
 
 
@@ -192,7 +192,7 @@ def main():
     """
     Entry point for the performance check script
     """
-    parser = performance_check_parser()
+    parser = solver_statistics_check_parser()
     args = parser.parse_args()
     fname, parsingErrors = parse_log_file( args.filename )
     

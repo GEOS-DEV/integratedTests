@@ -13,7 +13,7 @@ from geos_ats.configuration_record import config
 
 logger = logging.getLogger('geos_ats')
 
-EXTRACTED_PERFORMANCECHECK_DATAFILE = 'extracted_performance_data.h5'
+EXTRACTED_SOLVERSTATISTICSCHECK_DATAFILE = 'extracted_solverStat_data.h5'
 
 def getGeosProblemName(deck, name):
     """
@@ -776,7 +776,7 @@ class performancecheck(CheckTestStepBase):
 
     doc = """CheckTestStep to compare a curve file against a baseline."""
 
-    command = """performance_check.py filename baseline"""
+    command = """solver_statistics_check.py filename baseline"""
 
     params = TestStepBase.defaultParams + CheckTestStepBase.checkParams + (
         TestStepBase.commonParams["deck"], TestStepBase.commonParams["name"], TestStepBase.commonParams["np"],
@@ -810,7 +810,7 @@ class performancecheck(CheckTestStepBase):
 
     def makeArgs(self):
         cur_dir = os.path.dirname(os.path.realpath(__file__))
-        script_location = os.path.join(cur_dir, "helpers", "performance_check.py")
+        script_location = os.path.join(cur_dir, "helpers", "solver_statistics_check.py")
         args = [script_location]
 
         if self.p.tolerance is not None:
@@ -834,7 +834,7 @@ class performancecheck(CheckTestStepBase):
         
         baseline_dir = os.path.split(self.baseline_file)[0]
         os.makedirs(baseline_dir, exist_ok=True)
-        file = os.path.join(self.p.output_directory, EXTRACTED_PERFORMANCECHECK_DATAFILE)
+        file = os.path.join(self.p.output_directory, EXTRACTED_SOLVERSTATISTICSCHECK_DATAFILE)
         shutil.copyfile(file, self.baseline_file)
 
     def update(self, dictionary):
@@ -845,7 +845,7 @@ class performancecheck(CheckTestStepBase):
         self.requireParam("baseline_dir")
         self.requireParam("output_directory")
 
-        self.baseline_file = os.path.join(self.p.baseline_dir, EXTRACTED_PERFORMANCECHECK_DATAFILE)
+        self.baseline_file = os.path.join(self.p.baseline_dir, EXTRACTED_SOLVERSTATISTICSCHECK_DATAFILE)
         output_directory = self.p.output_directory
 
         # Search for all files with a .data extension within the output_directory
@@ -857,7 +857,7 @@ class performancecheck(CheckTestStepBase):
         else:
             raise Exception(f'No .data file was found in {output_directory}')
 
-        self.figure_root = os.path.join(self.p.output_directory, 'performance_check')
+        self.figure_root = os.path.join(self.p.output_directory, 'solver_statistics_check')
 
         if self.p.allow_rebaseline is None:
             self.p.allow_rebaseline = True

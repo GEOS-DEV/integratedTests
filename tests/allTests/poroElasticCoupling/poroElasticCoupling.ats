@@ -1,6 +1,6 @@
 
 import geos_ats 
-from geos_ats.test_builder import TestDeck, RestartcheckParameters, PerformancecheckParameters, generate_geos_tests
+from geos_ats.test_builder import TestDeck, RestartcheckParameters, SolverstatisticscheckParameters, generate_geos_tests
 
 
 class Description(object):
@@ -219,13 +219,13 @@ def test_poro_elastic_coupling_cases():
                                 partitions=[ (1, 1, 1), (3, 1, 2) ], 
                                 restart_step=0,
                                 check_step=0,
-                                performancecheck_params=PerformancecheckParameters(tolerance=[0.1, 0.2])),
+                                performancecheck_params=SolverstatisticscheckParameters(tolerance=[0.1, 0.2])),
                         TestDeck( name="PoroElastic_staircase_co2_3d_mgr", 
                                 description="Staircase CO2 poroelastic problem with Peaceman wells using mgr strategy", 
                                 partitions=[ (1, 1, 1), (2, 2, 1) ], 
                                 restart_step=0,
                                 check_step=0,
-                                performancecheck_params=PerformancecheckParameters(tolerance=[0.1, 0.2]))         
+                                performancecheck_params=SolverstatisticscheckParameters(tolerance=[0.1, 0.2]))         
                     ]
 
     generate_geos_tests( deck_instances )                  

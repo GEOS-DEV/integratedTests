@@ -1,6 +1,6 @@
 import os
 import geos_ats
-from geos_ats.test_builder import TestDeck, CurveCheckParameters, RestartcheckParameters, PerformancecheckParameters, generate_geos_tests
+from geos_ats.test_builder import TestDeck, CurveCheckParameters, RestartcheckParameters, SolverstatisticscheckParameters, generate_geos_tests
 
 restartcheck_params = {'atol': 1e-08, 'rtol': 4e-07}
 
@@ -24,7 +24,7 @@ decks = [TestDeck(name='Sneddon_embeddedFrac_smoke',
                   restart_step=0, 
                   check_step=1,
                   curvecheck_params=CurveCheckParameters(**curvecheck_params),
-                  performancecheck_params=PerformancecheckParameters(tolerance=[0.1, 0.2])),          
+                  performancecheck_params=SolverstatisticscheckParameters(tolerance=[0.1, 0.2])),          
         TestDeck(name='Sneddon_embeddedFrac_staticCondensation_smoke', 
                   description="Sneddon with horizontal fracture using static condensation", 
                   partitions=((1, 1, 1), (2, 2, 1)), 

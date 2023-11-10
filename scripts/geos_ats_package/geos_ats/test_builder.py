@@ -29,6 +29,13 @@ class CurveCheckParameters:
 
 
 @dataclass(frozen=True)
+class SolverstatisticscheckParameters:
+    tolerance: tuple[float, float]
+
+    def as_dict(self):
+        return asdict(self)    
+    
+@dataclass(frozen=True)
 class TestDeck:
     name: str
     description: str
@@ -37,6 +44,7 @@ class TestDeck:
     check_step: int
     restartcheck_params: RestartcheckParameters = None
     curvecheck_params: CurveCheckParameters = None
+    performancecheck_params: SolverstatisticscheckParameters= None
 
 
 def collect_block_names(fname):
@@ -80,14 +88,18 @@ def generate_geos_tests(decks: Iterable[TestDeck]):
     """
     for ii, deck in enumerate(decks):
 
-        restartcheck_params = None
-        curvecheck_params = None
+        restartcheck_params=None
+        curvecheck_params=None
+        performancecheck_params=None
 
         if deck.restartcheck_params is not None:
             restartcheck_params = deck.restartcheck_params.as_dict()
 
         if deck.curvecheck_params is not None:
             curvecheck_params = deck.curvecheck_params.as_dict()
+
+        if deck.performancecheck_params is not None:
+            performancecheck_params = deck.performancecheck_params.as_dict()    
 
         for partition in deck.partitions:
             nx, ny, nz = partition
@@ -111,7 +123,8 @@ def generate_geos_tests(decks: Iterable[TestDeck]):
                      y_partitions=ny,
                      z_partitions=nz,
                      restartcheck_params=restartcheck_params,
-                     curvecheck_params=curvecheck_params)
+                     curvecheck_params=curvecheck_params,
+                     performancecheck_params=performancecheck_params)
             ]
 
             if deck.restart_step > 0:

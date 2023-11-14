@@ -17,7 +17,7 @@ decks = [
              description='Multiphase flow EDFM inclined frac.',
              partitions=((1, 1, 1), (2, 2, 1)),
              restart_step=0,
-             check_step=29,
+             check_step=42,
              restartcheck_params=RestartcheckParameters(**restartcheck_params))
 ]
 

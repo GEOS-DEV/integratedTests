@@ -512,7 +512,7 @@ def main():
     # return 0 if all tests passed, 1 otherwise
     try:
         if options.failIfTestsFail:
-            with open(os.path.join(os.getcwd(), "test_results.html"), 'r') as f:
+            with open(os.path.join(options.logs, "test_results.html"), 'r') as f:
                 contents = ''.join(f.readlines()).split("DETAILED RESULTS")[1]
                 messages = [
                     "class=\"red\">FAIL", "class=\"yellow\">SKIPPED", "class=\"reddish\">FAIL",

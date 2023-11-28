@@ -1,5 +1,9 @@
 import os
-from typing import Iterable
+from typing import (
+    Iterable,
+    List,
+    Tuple,
+)
 from dataclasses import dataclass, asdict
 from ats.tests import AtsTest
 from lxml import etree
@@ -20,7 +24,7 @@ class RestartcheckParameters:
 class CurveCheckParameters:
     filename: str
     tolerance: Iterable[float]
-    curves: list[list[str]]
+    curves: List[List[str]]
     script_instructions: Iterable[Iterable[str]] = None
     time_units: str = "seconds"
 
@@ -32,7 +36,7 @@ class CurveCheckParameters:
 class TestDeck:
     name: str
     description: str
-    partitions: Iterable[tuple[int, int, int]]
+    partitions: Iterable[Tuple[int, int, int]]
     restart_step: int
     check_step: int
     restartcheck_params: RestartcheckParameters = None

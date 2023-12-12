@@ -1,0 +1,2 @@
+time [s],bhp [Pa],total rate [kg/s],total reservoir volumetric rate [rm3/s],phase0 reservoir volumetric rate [rm3/s],phase1 reservoir volumetric rate [rm3/s]
+250000,0.0,0.0,0.0,0.0,0.0

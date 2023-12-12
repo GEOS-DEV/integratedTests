@@ -1,4 +1,4 @@
-time [s],bhp [Pa],total rate [kg/s],total reservoir volumetric rate [rm3/s]
+Time [s],BHP [Pa],Total rate [kg/s],Total reservoir volumetric rate [rm3/s]
 70000,500000,-0.000332549,-3.32549e-07
 80000,500000,-0.000329379,-3.29379e-07
 90000,500000,-0.000326909,-3.26909e-07

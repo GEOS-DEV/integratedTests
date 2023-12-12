@@ -1,4 +1,4 @@
-time [s],bhp [Pa],total rate [mol/s],total surface volumetric rate [sm3/s],phase0 surface volumetric rate [sm3/s],phase1 surface volumetric rate [sm3/s],phase2 surface volumetric rate [sm3/s]
+Time [s],BHP [Pa],Total rate [mol/s],Total surface Volumetric rate [sm3/s],Phase0 surface volumetric rate [sm3/s],Phase1 surface volumetric rate [sm3/s],Phase2 surface volumetric rate [sm3/s]
 260000,1.56076e+07,0.544391,1e-05,9.03917e-46,5.22451e-43,1e-05
 265000,1.56451e+07,0.544391,1e-05,1.60673e-41,5.22451e-43,1e-05
 270000,1.56853e+07,0.544391,1e-05,1.60673e-41,3.52329e-39,1e-05

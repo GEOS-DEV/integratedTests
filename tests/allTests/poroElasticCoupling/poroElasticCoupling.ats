@@ -206,6 +206,11 @@ def _build_PoroElasticGravity_cases():
     return _build_poro_elastic_coupling_case("PoroElastic_gravity.xml", (5, 10), ((1, 1, 1), (1, 1, 2)), description,
                                              restartcheck_params)
 
+def _build_NonlinearAccelerationValidation_cases():
+    description = Description("Nonlinear acceleration validation problem ", "auto", "Sohail Waziri", True)
+    restartcheck_params = {"atol": 1.0e-4, "rtol": 2.0e-6}
+    return _build_poro_elastic_coupling_case("validationCase.xml", (3, 6), ((1, 1, 1),),
+                                             description, restartcheck_params)
 
 def test_poro_elastic_coupling_cases():
     deck_instances = [
@@ -227,7 +232,8 @@ def test_poro_elastic_coupling_cases():
         _build_PoroStaircaseCO2PeacemanWell_sequential_cases(),
         _build_PoroElasticPEBICO2FIM_cases(),
         _build_PoroElasticPEBICO2Sequential_cases(),
-        _build_PoroElasticGravity_cases()
+        _build_PoroElasticGravity_cases(),
+        _build_NonlinearAccelerationValidation_cases()
     ]
 
     generate_geos_tests(deck_instances)
